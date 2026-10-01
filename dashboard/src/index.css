@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* Tailwind 4：主题令牌直接写在 CSS 里，不需要 tailwind.config.js。
+   暗色模式 = 在 <html> 上挂 .dark 类，覆盖同名 CSS 变量即可 ——
+   所有 bg-surface / text-ink / border-line 之类的工具类会自动跟着变，
+   组件里不需要写一个 dark: 前缀。 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* 面 */
+  --color-canvas: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-sunken: #fafbfc;
+  --color-hover: #f2f4f7;
+  /* 线 */
+  --color-line: #e3e6ea;
+  --color-line-strong: #cfd5dd;
+  /* 字 */
+  --color-ink: #1f2733;
+  --color-ink-soft: #6b7480;
+  --color-muted: #9aa3ae;
+  /* 品牌色 */
+  --color-brand: #2563eb;
+  --color-brand-soft: #eef3fe;
+  --color-on-brand: #ffffff;
+  /* 语义色：* 为强调字，*-soft 为底，*-ink 为浅底上的深字 */
+  --color-ok: #15803d;
+  --color-ok-soft: #e8f6ed;
+  --color-ok-ink: #14532d;
+  --color-warn: #b45309;
+  --color-warn-soft: #fdf3e4;
+  --color-warn-ink: #7c4a06;
+  --color-err: #c02626;
+  --color-err-soft: #fdecec;
+  --color-err-ink: #8a1c1c;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* 暗色令牌：用 :root.dark 提高一级特异性，稳压 @theme 产出的 :root */
+:root.dark {
+  --color-canvas: #0d1117;
+  --color-surface: #161b22;
+  --color-sunken: #1b2230;
+  --color-hover: #212a36;
+  --color-line: #262d38;
+  --color-line-strong: #3a434f;
+  --color-ink: #e6edf3;
+  --color-ink-soft: #9198a1;
+  --color-muted: #6e7681;
+  --color-brand: #5b9dff;
+  --color-brand-soft: #14283f;
+  --color-on-brand: #0b1220;
+  --color-ok: #4ec97a;
+  --color-ok-soft: #12291c;
+  --color-ok-ink: #a5e6bd;
+  --color-warn: #e0a83f;
+  --color-warn-soft: #2a2312;
+  --color-warn-ink: #f0cd8a;
+  --color-err: #f8736c;
+  --color-err-soft: #2d1618;
+  --color-err-ink: #ffb3ae;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+/* 日志区滚动条低调一点 */
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 4px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

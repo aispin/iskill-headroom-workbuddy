@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#10C8A1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <title>ISKILL-HEADROOM-WORKBUDDY 控制台</title>
+    <!--
+      防闪烁：在 React 挂载前就把 .dark 和 lang 写死，
+      否则首帧会先渲染浅色/中文再跳变。
+      逻辑与 src/theme.ts、src/i18n/index.tsx 保持一致。
+    -->
+    <script>
+      (function () {
+        try {
+          var qs = new URLSearchParams(location.search);
+          var theme = qs.get("theme") || localStorage.getItem("iskill-dashboard-theme") || "system";
+          var dark =
+            theme === "dark" ||
+            (theme === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+          var lang = qs.get("lang") || localStorage.getItem("iskill-dashboard-lang");
+          if (lang !== "zh" && lang !== "en") {
+            lang = (navigator.language || "zh").toLowerCase().indexOf("zh") === 0 ? "zh" : "en";
+          }
+          document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+        } catch (e) {
+          /* 忽略 */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

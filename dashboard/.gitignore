@@ -1,0 +1,11 @@
+# 依赖
+node_modules/
+*.local
+.vite/
+
+# dist/ 是**故意提交**的：控制台由纯 stdlib 的 dashboard.py 单端口托管，
+# 随包带上构建产物，使用者无需安装 Node 即可打开控制台。
+
+# 编辑器 / 系统
+.DS_Store
+*.tsbuildinfo
