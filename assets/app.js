@@ -296,9 +296,12 @@
     if (!box) return;
     box.innerHTML = "";
     (data.items || []).forEach(function (s, i) {
-      /* codeKey: "install" → 用推导出来的安装提示词，别在 content.js 里抄一遍 URL */
-      var isPrompt = s.codeKey === "install";
-      var codeText = isPrompt ? installPrompt(lang) : s.code;
+      /* codeKey: "install" → 用推导出来的安装提示词，别在 content.js 里抄一遍 URL
+         codeName: "prompt" → 说给 agent 的一句话：文本用 s.code，但样式按提示词走
+         （code-prompt 换行、不做 # 着色） */
+      var isInstall = s.codeKey === "install";
+      var isPrompt = isInstall || s.codeName === "prompt";
+      var codeText = isInstall ? installPrompt(lang) : s.code;
       var wrap = el("div", "step reveal");
       var num = el("div", "num", String(i + 1));
       var body = el("div", "body");
