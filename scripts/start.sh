@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# iskill-headroom-workbuddy · 一键起服务
+# iskill-headroom-workbuddy2api · 一键起服务
 #
 # ⚠️ 这里只是一层薄壳：真正的实现在 scripts/hwb.py（跨 macOS / Windows / Linux 一份代码）。
 #    保留 .sh 文件名是为了兼容既有文档与习惯；改逻辑请改 hwb.py，别在这儿加。

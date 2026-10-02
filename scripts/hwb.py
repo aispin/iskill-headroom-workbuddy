@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""iskill-headroom-workbuddy · 跨平台启动器（macOS / Windows / Linux）
+"""iskill-headroom-workbuddy2api · 跨平台启动器（macOS / Windows / Linux）
 
 链路：客户端 → Headroom(:8787 压缩) → workbuddy2api-hub(:8788 转换) → WorkBuddy 官方内置模型
 
@@ -71,7 +71,7 @@ _init_console()
 
 # ─────────────────────────────────────────────────────────────
 # 常量 / 路径
-RUNTIME = Path(os.environ.get("ISKILL_RUNTIME") or (Path.home() / ".iskill-headroom-workbuddy"))
+RUNTIME = Path(os.environ.get("ISKILL_RUNTIME") or (Path.home() / ".iskill-headroom-workbuddy2api"))
 SKILL_DIR = Path(__file__).resolve().parent.parent
 
 HUB_REPO = "https://github.com/ardeyouxipianyi/workbuddy2api-hub.git"
@@ -784,7 +784,7 @@ def do_start(open_console: bool = True, open_browser: bool = True) -> int:
                       f"（React 操作台 :{DASH_PORT}）")
     print(f"""
 ══════════════════════════════════════════════════════════
- iskill-headroom-workbuddy 已启动
+ iskill-headroom-workbuddy2api 已启动
 ──────────────────────────────────────────────────────────
  链路：客户端 → Headroom(:{HEADROOM_PORT} 压缩) → hub(:{HUB_PORT} 转换) → 官方模型
 
@@ -824,7 +824,7 @@ def _panel_password_matches(panel_pw: str) -> bool:
 # 动作：stop
 def do_stop(quiet: bool = False, with_dashboard: bool = True) -> int:
     def log(msg: str) -> None:
-        print(f"[iskill-headroom-workbuddy] {msg}")
+        print(f"[iskill-headroom-workbuddy2api] {msg}")
 
     killed_any = False
     d = read_pids()
@@ -871,7 +871,7 @@ def do_stop(quiet: bool = False, with_dashboard: bool = True) -> int:
 # ─────────────────────────────────────────────────────────────
 # 动作：status
 def do_status(raw: bool = False) -> int:
-    print("[iskill-headroom-workbuddy] 运行状态")
+    print("[iskill-headroom-workbuddy2api] 运行状态")
     print(f"  平台          : {sys.platform}　Python {sys.version.split()[0]}（{PYTHON_BIN}）")
     print(f"  运行时目录    : {RUNTIME}")
 
@@ -1077,7 +1077,7 @@ def _build_dashboard() -> bool:
 
 def do_dashboard(action: str = "start", foreground: bool = False, open_browser: bool = False) -> int:
     def log(msg: str) -> None:
-        print(f"[iskill-headroom-workbuddy] {msg}")
+        print(f"[iskill-headroom-workbuddy2api] {msg}")
 
     if action == "build":
         return 0 if _build_dashboard() else 1
@@ -1130,7 +1130,7 @@ def do_dashboard(action: str = "start", foreground: bool = False, open_browser: 
 # ─────────────────────────────────────────────────────────────
 # 动作：doctor（环境体检）
 def do_doctor() -> int:
-    print("[iskill-headroom-workbuddy] 环境体检")
+    print("[iskill-headroom-workbuddy2api] 环境体检")
     print(f"  平台          : {sys.platform}  ({'Windows' if IS_WINDOWS else 'macOS' if IS_MACOS else 'Linux'})")
     print(f"  Python        : {sys.version.split()[0]}  →  {PYTHON_BIN}")
     print(f"  运行时目录    : {RUNTIME}  ({'存在' if RUNTIME.exists() else '不存在（首次 start 会创建）'})")
@@ -1194,7 +1194,7 @@ MENU = [
 def do_menu() -> int:
     print("""
 ╔══════════════════════════════════════════════════════════╗
-║   iskill-headroom-workbuddy · 启动器                      ║
+║   iskill-headroom-workbuddy2api · 启动器                      ║
 ║   WorkBuddy 内置模型 → OpenAI 兼容 API（自带上下文压缩）   ║
 ╚══════════════════════════════════════════════════════════╝""")
     while True:
@@ -1225,7 +1225,7 @@ def do_menu() -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(
         prog="hwb.py", add_help=True,
-        description="iskill-headroom-workbuddy 跨平台启动器（macOS / Windows / Linux）")
+        description="iskill-headroom-workbuddy2api 跨平台启动器（macOS / Windows / Linux）")
     sub = ap.add_subparsers(dest="action")
     p_start = sub.add_parser("start", help="启动服务（默认连图形控制台一起拉起，并打开浏览器）")
     p_start.add_argument("--no-open", action="store_true", help="不自动打开浏览器（脚本/自动化场景用）")

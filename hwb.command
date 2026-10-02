@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# iskill-headroom-workbuddy · 双击运行入口（macOS）
+# iskill-headroom-workbuddy2api · 双击运行入口（macOS）
 #
 # 在 Finder 里双击本文件即可（.command 会被「终端」打开并执行）。
 # 无参数 = 交互菜单；也可以在终端里 ./hwb.command status 这样用，参数原样透传。
@@ -7,13 +7,13 @@
 # 为什么是这么薄的一层：真正的逻辑全在 scripts/hwb.py（一份跨平台代码），
 # 本文件只负责「找到 python + 把参数转过去 + 收尾」。
 #
-# 收尾判定的每一步都会写日志：~/.iskill-headroom-workbuddy/logs/launcher.log
+# 收尾判定的每一步都会写日志：~/.iskill-headroom-workbuddy2api/logs/launcher.log
 # （关窗这件事依赖 osascript，可能被系统权限拦下；没有日志就只能靠猜。）
 
 cd "$(dirname "$0")" || exit 1
 here="$(pwd)"
 me="$(basename "$0")"
-LOGDIR="${HOME}/.iskill-headroom-workbuddy/logs"
+LOGDIR="${HOME}/.iskill-headroom-workbuddy2api/logs"
 mkdir -p "$LOGDIR" 2>/dev/null
 LAUNCH_LOG="${LOGDIR}/launcher.log"
 launch_log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$LAUNCH_LOG" 2>/dev/null; }

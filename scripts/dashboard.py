@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""iskill-headroom-workbuddy · 本地控制台
+"""iskill-headroom-workbuddy2api · 本地控制台
 
 零三方依赖（纯标准库），只看本机：
 
@@ -28,7 +28,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HOME = os.path.expanduser("~")
-RUNTIME = os.environ.get("ISKILL_RUNTIME") or os.path.join(HOME, ".iskill-headroom-workbuddy")
+RUNTIME = os.environ.get("ISKILL_RUNTIME") or os.path.join(HOME, ".iskill-headroom-workbuddy2api")
 HUB_ENV = os.path.join(RUNTIME, "hub.env")
 HUB_ACCOUNTS = os.path.join(RUNTIME, "hub-accounts")
 PIDS_FILE = os.path.join(RUNTIME, "pids.json")
@@ -441,7 +441,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="iskill-headroom-workbuddy 本地控制台")
+    ap = argparse.ArgumentParser(description="iskill-headroom-workbuddy2api 本地控制台")
     ap.add_argument("--port", type=int,
                     default=int(os.environ.get("DASHBOARD_PORT") or DEFAULT_DASHBOARD_PORT))
     ap.add_argument("--host", default="127.0.0.1")
@@ -460,7 +460,7 @@ def main():
     srv.daemon_threads = True
     url = "http://%s:%d/" % ("127.0.0.1", args.port)
     print("=" * 62)
-    print(" iskill-headroom-workbuddy 控制台")
+    print(" iskill-headroom-workbuddy2api 控制台")
     print()
     print("   控制台   : %s" % url)
     print("   前端产物 : %s%s" % (DIST_DIR, "" if dist_ok else "  [未构建]"))

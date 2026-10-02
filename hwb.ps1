@@ -1,4 +1,4 @@
-﻿# iskill-headroom-workbuddy · Windows 入口（PowerShell）
+﻿# iskill-headroom-workbuddy2api · Windows 入口（PowerShell）
 #
 # 用法（PowerShell 里）：
 #   .\hwb.ps1              # 交互菜单

@@ -1,4 +1,4 @@
-# iskill-headroom-workbuddy
+# iskill-headroom-workbuddy2api
 
 把 WorkBuddy 桌面端内置模型接成一个**任何人都能用的 OpenAI 兼容 API**，供 WorkBuddy / Cursor / 任意 OpenAI 客户端使用。
 
@@ -266,10 +266,10 @@ React + Vite + TS + Tailwind 工程，构建产物 `dashboard/dist/` 由 `dashbo
 
 ## 九、运行时目录
 
-所有运行态数据都在 `~/.iskill-headroom-workbuddy/`，技能目录只放文档与脚本：
+所有运行态数据都在 `~/.iskill-headroom-workbuddy2api/`，技能目录只放文档与脚本：
 
 ```
-~/.iskill-headroom-workbuddy/
+~/.iskill-headroom-workbuddy2api/
 ├── workbuddy2api-hub/     # 上游源码（零依赖，git 仓库）
 ├── hub-accounts/          # 账号凭证 + settings.json（与源码分离，升级不丢）
 ├── hub-usage/             # 请求流水 usage.jsonl

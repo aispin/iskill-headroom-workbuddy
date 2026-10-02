@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# iskill-headroom-workbuddy · 验证 Headroom 到底有没有在压缩（A/B 对照实验）
+# iskill-headroom-workbuddy2api · 验证 Headroom 到底有没有在压缩（A/B 对照实验）
 #
 # 为什么要做对照：Headroom 默认跑在 `--mode cache`，这个模式的设计目标是
 # **让上游的 prompt cache 命中**——历史前缀按字节原样回放，只压最新那条增量。
@@ -17,7 +17,7 @@
 
 set -eo pipefail
 
-RUNTIME="${ISKILL_RUNTIME:-$HOME/.iskill-headroom-workbuddy}"
+RUNTIME="${ISKILL_RUNTIME:-$HOME/.iskill-headroom-workbuddy2api}"
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 VENV="$RUNTIME/venv"
 HEADROOM_ENV="$RUNTIME/headroom.env"

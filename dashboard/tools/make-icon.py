@@ -103,8 +103,8 @@ def build():
     spout = "".join(
         '<circle cx="%d" cy="%d" r="%d"/>' % c for c in SPOUT
     )
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="iskill-headroom-workbuddy">
-  <title>iskill-headroom-workbuddy</title>
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="iskill-headroom-workbuddy2api">
+  <title>iskill-headroom-workbuddy2api</title>
   <defs>
     <!-- 底板：#10C8A1 主色，左上提亮 / 右下加深 -->
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">

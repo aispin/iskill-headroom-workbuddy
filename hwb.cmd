@@ -1,6 +1,6 @@
 @echo off
 rem ============================================================
-rem  iskill-headroom-workbuddy - Windows double-click entry
+rem  iskill-headroom-workbuddy2api - Windows double-click entry
 rem
 rem  Double-click THIS file. Reason: double-clicking a .ps1 opens
 rem  Notepad instead of running it. This shim calls PowerShell with

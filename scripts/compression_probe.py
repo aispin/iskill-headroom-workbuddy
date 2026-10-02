@@ -38,7 +38,7 @@ def load_api_key(console_port: int) -> str:
     except Exception:
         pass
 
-    env_path = os.path.expanduser("~/.iskill-headroom-workbuddy/hub.env")
+    env_path = os.path.expanduser("~/.iskill-headroom-workbuddy2api/hub.env")
     try:
         with open(env_path, "r", encoding="utf-8") as fh:
             for line in fh:

@@ -1,10 +1,10 @@
 ---
-name: iskill-headroom-workbuddy
+name: iskill-headroom-workbuddy2api
 description: 把 WorkBuddy 桌面端内置模型接成一个任何人都能用的 OpenAI 兼容 API——hub 负责「能用」（workbuddy2api-hub 做私有协议转 OpenAI + 看板 OAuth 加账号 + 多账号双区域调度 + 每日保活），headroom 负责「耐用」（Headroom 代理守住上游前缀缓存、只压最新增量，省 token 并拉长可对话的上下文）。跨平台：macOS / Windows / Linux 同一份实现，仓库根有双击即用的启动器（macOS `hwb.command`、Windows `hwb.cmd`），菜单里可选启动 / 停止 / 重启 / 状态 / 控制台 / 加账号 / 体检。当用户说「把 WorkBuddy 内置模型接到 Cursor」「给 WorkBuddy 加个自定义模型」「用 Headroom 接 workbuddy2api」「本地起一个省 token 的内置模型 API」「localhost:8787 自定义模型」「在 Windows 上启动 headroom」时使用。
 agent_created: true
 ---
 
-# iskill-headroom-workbuddy
+# iskill-headroom-workbuddy2api
 
 把 **WorkBuddy 桌面端内置模型**（DeepSeek / Kimi / GLM / 混元 / MiniMax …）接成一个**任何人都能用的 OpenAI 兼容 API**。
 
@@ -45,7 +45,7 @@ flowchart LR
 ## 组件说明
 
 ### Headroom（`:8787`）— 压缩层
-- Python 包 `headroom-ai[proxy]`，装在 `~/.iskill-headroom-workbuddy/venv`。
+- Python 包 `headroom-ai[proxy]`，装在 `~/.iskill-headroom-workbuddy2api/venv`。
 - 用 `OPENAI_TARGET_API_URL=http://127.0.0.1:8788` 把 OpenAI 流量透传到 hub（**不带 `/v1`**，由 proxy 自动拼路径）。
 - **原样转发客户端的 `Authorization` 头**（仅当客户端没带时才用 `OPENAI_API_KEY` 环境变量兜底），所以客户端的 API Key 能一路透传到 hub 做校验。
 - 已实测：`headroom proxy --help` 中 `--host/--port` 可被 `HEADROOM_HOST/HEADROOM_PORT` 覆盖；上游由 `OPENAI_TARGET_API_URL` 控制（`proxy/server.py`）。
@@ -214,7 +214,7 @@ Headroom 自己有账本：`~/.headroom/proxy_savings.json`（汇总，**会滞�
 ## 快速开始
 
 > **路径约定**：下文命令都用**完整脚本路径**，默认技能安装目录为
-> `~/.workbuddy/skills/iskill-headroom-workbuddy`（= 本仓库目录）。
+> `~/.workbuddy/skills/iskill-headroom-workbuddy2api`（= 本仓库目录）。
 > 装到别处就把这段前缀替换成你自己的技能目录。
 
 ### 双击运行（macOS / Windows 都支持）
@@ -238,7 +238,7 @@ Headroom 自己有账本：`~/.headroom/proxy_savings.json`（汇总，**会滞�
 ### 命令行
 
 ```bash
-S=~/.workbuddy/skills/iskill-headroom-workbuddy
+S=~/.workbuddy/skills/iskill-headroom-workbuddy2api
 
 # 1) 起服务（首次会 clone hub、装 Headroom；hub 零依赖秒起）
 bash $S/scripts/start.sh
@@ -287,7 +287,7 @@ WorkBuddy 桌面端 → **设置 → 模型 → 添加模型 → 自定义/Custo
 ## 添加账号（OAuth）
 
 ```bash
-bash ~/.workbuddy/skills/iskill-headroom-workbuddy/scripts/login.sh
+bash ~/.workbuddy/skills/iskill-headroom-workbuddy2api/scripts/login.sh
 #   --no-wait        只打印看板地址与密码，不等待
 #   --timeout 秒     自定义等待上限（默认 600）
 ```
@@ -296,7 +296,7 @@ bash ~/.workbuddy/skills/iskill-headroom-workbuddy/scripts/login.sh
 
 - 国际版与国内版是**两套独立账号池**，常用哪个就先加哪个。
 - 控制台里也能一键发起：点「登录国际版 / 登录国内版」，授权链接直接弹出。
-- 账号凭证只落在本机 `~/.iskill-headroom-workbuddy/hub-accounts/`。
+- 账号凭证只落在本机 `~/.iskill-headroom-workbuddy2api/hub-accounts/`。
 - **授权页那句「返回 CLI 继续使用」改不了**：它是 `www.workbuddy.ai/login` 自己渲染的，而 authUrl 只带 `platform` 与 `state` 两个参数，**没有回跳 / callback 钩子**，第三方无从指定返回地址（`platform` 是唯一能影响其文案的开关，但它同时会写进账号档案，不值得为一句文案去动）。
   - 想要「登录完自动回到控制台」，在**客户端侧**做：控制台用 `window.open` 打开授权页时**不能带 `noopener`**（带了返回 `null`、拿不到句柄），改为手动把 `w.opener` 置空；登录轮询到 `ok`（或取消/失败）时 `close()` 掉授权标签页，用户视线就自动回到控制台。见 `dashboard/src/components/PoolCard.tsx` 的 `openAuth()` / `closeAuth()`。
 - **登录完记得对齐区域**：账号实际属地由登录时的账号决定（国内账号 → `realm=cn`），而 hub 出口区域默认 `intl`，不一致会让 `/v1/chat/completions` 直接 503。见「排错」表。
@@ -320,7 +320,7 @@ extra = () if configured_keys() else (API_KEY,)   # 面板里一旦有 Key，命
 ## 控制台
 
 ```bash
-S=~/.workbuddy/skills/iskill-headroom-workbuddy
+S=~/.workbuddy/skills/iskill-headroom-workbuddy2api
 bash $S/scripts/dashboard.sh            # 启动 + 打开浏览器（127.0.0.1:8786，产物缺失会自动构建）
 bash $S/scripts/dashboard.sh --no-open  # 启动但不弹浏览器
 bash $S/scripts/dashboard.sh --build    # 只构建前端
@@ -355,8 +355,8 @@ cd $S/dashboard && npm run dev          # → http://127.0.0.1:5173
 [`iskill-promo-page/references/deploy-modes.md`](../iskill-promo-page/references/deploy-modes.md)：
 
 ```bash
-bash <promo-page>/scripts/pages.sh status   aispin/iskill-headroom-workbuddy   # 先看现状
-bash <promo-page>/scripts/pages.sh workflow aispin/iskill-headroom-workbuddy --apply
+bash <promo-page>/scripts/pages.sh status   aispin/iskill-headroom-workbuddy2api   # 先看现状
+bash <promo-page>/scripts/pages.sh workflow aispin/iskill-headroom-workbuddy2api --apply
 ```
 
 > ⚠️ 不想用 Actions 的话：Pages 分支模式**只认 `/` 与 `/docs`**，无法指向 `promo-page/` ——
@@ -366,7 +366,7 @@ bash <promo-page>/scripts/pages.sh workflow aispin/iskill-headroom-workbuddy --a
 
 ## 配置与运行时目录
 
-运行态数据全在 `~/.iskill-headroom-workbuddy/`（可用环境变量 `ISKILL_RUNTIME` 改）：
+运行态数据全在 `~/.iskill-headroom-workbuddy2api/`（可用环境变量 `ISKILL_RUNTIME` 改）：
 
 ```
 workbuddy2api-hub/   上游源码（git 仓库）
@@ -407,11 +407,11 @@ GIT_PROXY=http://127.0.0.1:10080 bash $S/scripts/start.sh
 | 客户端报连接错误 / 模型不可用 | 先 `bash $S/scripts/status.sh` 看两端口是否都在听 |
 | 控制台「已省 token」一直是 0 / `/stats` 显示 `requests_compressed=0` | **多半不是故障**。默认 `cache` 模式只压**最新那条增量**，历史前缀走冻结区（命中上游缓存即省下 98% 单价，但那部分不计入 `tokens_saved`）；**纯聊天没有"活区"**（活区边界 = 第一个不在压缩缓存里的 `tool_result`），所以压不动。**想让它显示非 0**：用**以工具结果结尾**的请求测（真实 agent 循环就是这形状），别用纯聊天。跑 `bash $S/scripts/test-compression.sh` 一条命令验证（见上文「压缩模式」节） |
 | 账号池为空 | `bash $S/scripts/login.sh`（`/v1/chat/completions` 无账号时返回 503 + 可读原因） |
-| 503 `no usable account for realm 'intl'`，但 `/health` 明明显示 `accounts: 1` | **账号区域 ≠ hub 出口区域**。`/health` 的计数不分区域，所以池里有账号也会 503。你的账号实际属地写在 `~/.iskill-headroom-workbuddy/hub-accounts/<uid>.json` 的 `realm` 字段（国内账号 = `cn`，域名 `www.codebuddy.cn`）；hub 出口区域默认 `intl`。对齐即可：控制台/hub 看板切区域，或 `POST :8788/realm {"realm":"cn"}`（需面板会话）。切换会持久化到 `hub-accounts/active_realm.json`，重启不回退。 |
+| 503 `no usable account for realm 'intl'`，但 `/health` 明明显示 `accounts: 1` | **账号区域 ≠ hub 出口区域**。`/health` 的计数不分区域，所以池里有账号也会 503。你的账号实际属地写在 `~/.iskill-headroom-workbuddy2api/hub-accounts/<uid>.json` 的 `realm` 字段（国内账号 = `cn`，域名 `www.codebuddy.cn`）；hub 出口区域默认 `intl`。对齐即可：控制台/hub 看板切区域，或 `POST :8788/realm {"realm":"cn"}`（需面板会话）。切换会持久化到 `hub-accounts/active_realm.json`，重启不回退。 |
 | 401 invalid api key | Key 用错了。跑 `status.sh` 看「客户端 Key」——面板 Key 优先于命令行 Key |
 | 想直接用 hub、绕过压缩 | 把客户端地址改成 `http://localhost:8788/v1/chat/completions` 对比效果（无压缩） |
-| hub 起不来 | `tail -n 40 ~/.iskill-headroom-workbuddy/logs/hub.log` |
-| Headroom 起不来 | `tail -n 40 ~/.iskill-headroom-workbuddy/logs/headroom.log` |
+| hub 起不来 | `tail -n 40 ~/.iskill-headroom-workbuddy2api/logs/hub.log` |
+| Headroom 起不来 | `tail -n 40 ~/.iskill-headroom-workbuddy2api/logs/headroom.log` |
 | 端口被占 | `start.sh` 会先按 `pids.json` 与端口兜底清理旧实例；仍冲突就改 `hub.env` 的 `HUB_PORT` |
 | 看板密码想改 | `bash $S/scripts/start.sh` 前设 `PANEL_PASSWORD=xxx`，或在 hub 看板「设置」里改 |
 | token 过期 | 一般不用管（hub 每日 22:00 自动保活）；急用可在控制台点「手动保活」或调 `/accounts/refresh` |

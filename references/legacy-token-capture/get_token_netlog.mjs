@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// iskill-headroom-workbuddy · 从 Chromium netlog 中提取 WorkBuddy 的 Authorization Bearer → 写入 workbuddy2api/.env
+// iskill-headroom-workbuddy2api · 从 Chromium netlog 中提取 WorkBuddy 的 Authorization Bearer → 写入 workbuddy2api/.env
 //
 // 原理（2026-10-01 用真实 Chrome 端到端验证）：
 //   Chromium 的 `--log-net-log=<file> --net-log-capture-mode=IncludeSensitive`
@@ -19,14 +19,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HOME = os.homedir();
-const RUNTIME = path.join(HOME, ".iskill-headroom-workbuddy");
+const RUNTIME = path.join(HOME, ".iskill-headroom-workbuddy2api");
 const ENV_PATH = path.join(RUNTIME, "workbuddy2api", ".env");
 const DEFAULT_NETLOG = path.join(RUNTIME, "netlog.json");
 
 // 技能安装目录全路径（用于打印可直接复制的完整命令）：
 // 优先用规范的 active 安装路径 ~/.workbuddy/skills/<skill>，否则回退到本脚本自身所在目录。
 const SKILL_DIR = (() => {
-  const installed = path.join(HOME, ".workbuddy", "skills", "iskill-headroom-workbuddy");
+  const installed = path.join(HOME, ".workbuddy", "skills", "iskill-headroom-workbuddy2api");
   try { if (fs.existsSync(installed)) return installed; } catch {}
   return path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 })();

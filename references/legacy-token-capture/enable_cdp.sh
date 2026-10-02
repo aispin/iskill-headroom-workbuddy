@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# iskill-headroom-workbuddy · WorkBuddy 桌面端「抓包参数」开关
+# iskill-headroom-workbuddy2api · WorkBuddy 桌面端「抓包参数」开关
 #
 # ⚠️ 重要：开启后是**持续**的，不是一次性的。
 #    WorkBuddy 会一直把整个网络栈（含 Authorization / Cookie 明文）追加写进 netlog，
@@ -21,7 +21,7 @@ set -e
 APP="/Applications/WorkBuddy.app"
 BIN="$APP/Contents/MacOS/WorkBuddy"
 PORT=9222
-RUNTIME="${HOME}/.iskill-headroom-workbuddy"
+RUNTIME="${HOME}/.iskill-headroom-workbuddy2api"
 NETLOG="${RUNTIME}/netlog.json"
 
 running_with_capture() {
@@ -75,7 +75,7 @@ case "${1:-}" in
 esac
 
 # ── 开启抓包 ─────────────────────────────────────────────────
-echo "[iskill-headroom-workbuddy] 准备以抓包参数重启 WorkBuddy 桌面端"
+echo "[iskill-headroom-workbuddy2api] 准备以抓包参数重启 WorkBuddy 桌面端"
 echo "⚠️  这会关闭当前正在运行的 WorkBuddy 客户端（会话会断、未保存内容可能丢失），"
 echo "    重启后它会监听 127.0.0.1:${PORT}（仅本机，不暴露公网）。"
 echo ""

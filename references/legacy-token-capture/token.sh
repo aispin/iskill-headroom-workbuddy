@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# iskill-headroom-workbuddy · 复用 / 更新上游 token 并重启 workbuddy2api
+# iskill-headroom-workbuddy2api · 复用 / 更新上游 token 并重启 workbuddy2api
 #
 # 默认行为：**.env 里已有 CODEBUDDY_AUTH_TOKEN 就直接复用它并重启**（不会让你重新输）。
 # 想换新 token：bash token.sh --set      （或设置环境变量 CODEBUDDY_AUTH_TOKEN）
 # Headroom 进程不动（它不依赖上游 token）。
 set -eo pipefail
 
-RUNTIME="${ISKILL_RUNTIME:-$HOME/.iskill-headroom-workbuddy}"
+RUNTIME="${ISKILL_RUNTIME:-$HOME/.iskill-headroom-workbuddy2api}"
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 WB2API_DIR="$RUNTIME/workbuddy2api"
 VENV="$RUNTIME/venv"
@@ -50,7 +50,7 @@ mask() {
   fi
 }
 
-echo "[iskill-headroom-workbuddy] 上游 token：复用 / 更新"
+echo "[iskill-headroom-workbuddy2api] 上游 token：复用 / 更新"
 echo "  [·] .env 现有: $(mask "$ENV_TOKEN")"
 
 TOK="${CODEBUDDY_AUTH_TOKEN:-}"

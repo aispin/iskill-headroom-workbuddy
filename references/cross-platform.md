@@ -155,7 +155,7 @@ Windows PowerShell 5.1 在没有 BOM 时按 **ANSI（中文机器上是 GBK）**
 
 ```bash
 PY=~/.workbuddy/binaries/python/versions/3.13.12/bin/python3
-cd ~/.workbuddy/skills/iskill-headroom-workbuddy
+cd ~/.workbuddy/skills/iskill-headroom-workbuddy2api
 
 # 只读的
 $PY scripts/hwb.py doctor

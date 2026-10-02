@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// iskill-headroom-workbuddy · 用 CDP 自动抓取 WorkBuddy 桌面端发出的 Bearer（含 webview / iframe / 懒加载 target）
+// iskill-headroom-workbuddy2api · 用 CDP 自动抓取 WorkBuddy 桌面端发出的 Bearer（含 webview / iframe / 懒加载 target）
 // 前置：桌面端须以 --remote-debugging-port 启动（见 enable_cdp.sh）。
 // 用法: node get_token_cdp.mjs [--port 9222] [--timeout 90] [--verbose]
 // 机制已用真实 Chrome 端到端验证（2026-10-01）：CDP 监听 Network.requestWillBeSent 可 100% 抓到 Authorization 头。
@@ -16,12 +16,12 @@ import { fileURLToPath } from "node:url";
 
 const WebSocket = globalThis.WebSocket; // Node 22 全局 WHATWG WebSocket，无需装 ws
 const HOME = os.homedir();
-const RUNTIME = path.join(HOME, ".iskill-headroom-workbuddy");
+const RUNTIME = path.join(HOME, ".iskill-headroom-workbuddy2api");
 const ENV_PATH = path.join(RUNTIME, "workbuddy2api", ".env");
 
 // 技能安装目录全路径（用于打印可直接复制的完整命令）
 const SKILL_DIR = (() => {
-  const installed = path.join(HOME, ".workbuddy", "skills", "iskill-headroom-workbuddy");
+  const installed = path.join(HOME, ".workbuddy", "skills", "iskill-headroom-workbuddy2api");
   try { if (fs.existsSync(installed)) return installed; } catch {}
   return path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 })();

@@ -1,9 +1,9 @@
 {
-  "name": "iskill-headroom-workbuddy-dashboard",
+  "name": "iskill-headroom-workbuddy2api-dashboard",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "iskill-headroom-workbuddy 本地控制台（React + Vite + TS + Tailwind）",
+  "description": "iskill-headroom-workbuddy2api 本地控制台（React + Vite + TS + Tailwind）",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

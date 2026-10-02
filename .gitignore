@@ -12,7 +12,7 @@ node_modules/
 *.tsbuildinfo
 
 # ── 运行时与本地配置 ──────────────────────────────────────────────────
-# 真实服务的全部状态都在 ~/.iskill-headroom-workbuddy/（凭证、venv、日志、pids），
+# 真实服务的全部状态都在 ~/.iskill-headroom-workbuddy2api/（凭证、venv、日志、pids），
 # 与本目录无关；下面几条是防手滑把临时产物带进来的兜底。
 *.log
 pids.json

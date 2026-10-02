@@ -393,7 +393,7 @@ token 只剩 28%，账单翻倍——因为压缩产生的是**全新前缀**，
 
 | 位置 | 原文 | 问题 | 建议 |
 |---|---|---|---|
-| `iskill-headroom-workbuddy/SKILL.md`（今晚新加的一节） | 「本链路上 headroom 的『省钱』价值 ≈ 0」 | 结论建立在**探针流量**上（短对话、无大工具输出），不能代表真实 agent 会话；官方文档证明压缩效果**强依赖负载类型** | 补一句限定：「该结论来自短对话探针负载；工具输出密集时官方实测可达 20%（编码 agent）～57%（SRE 排障）」 |
+| `iskill-headroom-workbuddy2api/SKILL.md`（今晚新加的一节） | 「本链路上 headroom 的『省钱』价值 ≈ 0」 | 结论建立在**探针流量**上（短对话、无大工具输出），不能代表真实 agent 会话；官方文档证明压缩效果**强依赖负载类型** | 补一句限定：「该结论来自短对话探针负载；工具输出密集时官方实测可达 20%（编码 agent）～57%（SRE 排障）」 |
 | `scripts/start.sh` 的注释 | 「cache 模式…**不做有损压缩**」 | 与事实不符（cache 模式会压 live zone 的新增量，只是不重写历史） | 改为「只压最新增量，不重写历史」 |
 | 本 skill 对 headroom 的定位 | 隐含「省 token 的压缩代理」 | 真正的杠杆是**缓存命中率**，压缩只占 1% 量级 | 改写为**双价值**：hub 让内置模型「用得上」，headroom 让它「跑得远」 |
 
@@ -410,11 +410,11 @@ token 只剩 28%，账单翻倍——因为压缩产生的是**全新前缀**，
 
 | 数据 | 来源 / 命令 |
 |---|---|
-| headroom 完整官方 README | `~/.iskill-headroom-workbuddy/venv/.../headroom_ai-0.39.1.dist-info/METADATA`（正文即 README） |
+| headroom 完整官方 README | `~/.iskill-headroom-workbuddy2api/venv/.../headroom_ai-0.39.1.dist-info/METADATA`（正文即 README） |
 | headroom 在线文档索引 | `https://docs.headroomlabs.ai/llms.txt` |
 | 本机省 token 统计 | `curl http://127.0.0.1:8787/stats`（重点看 `prefix_cache`、`compression`、`tokens`、`config`） |
 | 本机逐笔节省事件 | `~/.headroom/savings_events.jsonl`（字段 `before/after/saved/cache`） |
-| 本机逐请求账单 | `~/.iskill-headroom-workbuddy/hub-usage/usage.jsonl`（字段 `prompt_tokens/cached_tokens/credit/prefix_sha/system_sha`） |
+| 本机逐请求账单 | `~/.iskill-headroom-workbuddy2api/hub-usage/usage.jsonl`（字段 `prompt_tokens/cached_tokens/credit/prefix_sha/system_sha`） |
 | 仓库数据核实 | `gh api repos/<owner>/<repo> --jq '.stargazers_count,.pushed_at,.license.spdx_id'` |
 
 **待补的一次关键验证**：在**真实 WorkBuddy agent 会话**（含大段工具输出）上跑一轮采集，
