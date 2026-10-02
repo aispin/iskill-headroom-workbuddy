@@ -39,15 +39,19 @@ window.PROMO = {
         meta2: "macOS / Windows 双击即用",
         meta3: "看板 OAuth 加账号"
       },
-      terminal: {
-        title: "zsh — iskill-headroom-workbuddy",
-        lines: [
-          [{ t: "$ ", c: "p" }, { t: "bash scripts/start.sh", c: "k" }, { t: "   # macOS / Linux", c: "s" }],
-          [{ t: "> ", c: "p" }, { t: "hwb.cmd", c: "k" }, { t: "                 # Windows · 双击也行", c: "s" }],
-          [{ t: "✓ ", c: "p" }, { t: "hub :8788 + headroom :8787 已就绪", c: "s" }],
-          [{ t: "→ ", c: "p" }, { t: "控制台 http://127.0.0.1:8786", c: "k" }]
+      chat: {
+        title: "AI Agent · 对话现场",
+        status: "在线",
+        userLabel: "你",
+        agentLabel: "AI",
+        messages: [
+          { role: "user", text: "把 WorkBuddy 内置模型接成本地 OpenAI 兼容 API" },
+          { role: "agent", text: "两层：hub 负责能用（私有协议转 OpenAI + 看板加账号 + 多账号调度 + 每日保活），headroom 负责耐用（守前缀缓存、只压最新增量）。首次会下载压缩模型。", tag: "已读 架构图" },
+          { role: "user", text: "压缩档怎么选？" },
+          { role: "agent", text: "默认 cache 档别动——命中价只有未命中的 2%，切 token 档首请求还要加载模型约 32s。真正的价值是拉长可对话的上下文。" }
         ]
       },
+
 
       stats: [
         { value: "1 : 12", label: "上游缓存的杠杆", note: "命中单价仅为未命中的 2%，实测前缀命中率 92–97%" },
@@ -150,15 +154,19 @@ window.PROMO = {
         meta2: "macOS / Windows · double-click",
         meta3: "Dashboard OAuth"
       },
-      terminal: {
-        title: "zsh — iskill-headroom-workbuddy",
-        lines: [
-          [{ t: "$ ", c: "p" }, { t: "bash scripts/start.sh", c: "k" }, { t: "   # macOS / Linux", c: "s" }],
-          [{ t: "> ", c: "p" }, { t: "hwb.cmd", c: "k" }, { t: "                 # Windows · double-click", c: "s" }],
-          [{ t: "✓ ", c: "p" }, { t: "hub :8788 + headroom :8787 ready", c: "s" }],
-          [{ t: "→ ", c: "p" }, { t: "console http://127.0.0.1:8786", c: "k" }]
+      chat: {
+        title: "AI Agent · live session",
+        status: "online",
+        userLabel: "You",
+        agentLabel: "AI",
+        messages: [
+          { role: "user", text: "Expose WorkBuddy's built-in models as a local OpenAI-compatible API" },
+          { role: "agent", text: "Two layers: the hub makes it work (private protocol to OpenAI, OAuth via dashboard, multi-account scheduling, daily keep-alive); Headroom makes it last (prefix-cache retention, compressing only the newest delta). First run downloads a compression model.", tag: "read architecture" },
+          { role: "user", text: "Which compression preset should I use?" },
+          { role: "agent", text: "Leave it on the default cache preset — a hit costs 2% of a miss, and the token preset adds ~32s to load the model on first request. The real win is longer usable context." }
         ]
       },
+
 
       stats: [
         { value: "1 : 12", label: "the upstream cache lever", note: "a cache hit costs 2% of a miss; measured hit rate 92–97%" },
