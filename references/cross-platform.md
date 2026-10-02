@@ -104,10 +104,17 @@ Windows PowerShell 5.1 在没有 BOM 时按 **ANSI（中文机器上是 GBK）**
 
 - `hwb.py` 只用一个**约定退出码** `EXIT_MENU_QUIT = 10` 表达「用户主动退出菜单」，
   自己不碰任何关窗动作（Python 不该知道宿主是谁）。
-- `hwb.command` 收到 rc=10 后，用 `ps -o ppid= -p $$` 看**父进程名**：
-  是终端 App（Terminal / iTerm / Warp / WezTerm…）才算双击场景 → 关窗；
-  是 `bash`/`zsh` 等交互 shell → 走老逻辑等一个回车；
-  **`ps` 拿不到信息时保守不关**（宁可不关，也不错关）。
+- `hwb.command` 收到 rc=10 后判定场景（`classify_open`）：
+  - **direct（双击）**：父进程是 `login`（⚠️ Terminal 双击 .command 时，父进程是它的
+    **`login` 包装进程**，不是 Terminal 本身 —— 白名单漏了它就会判错，死在
+    `[Process completed]`）、终端 App 本身，或「父 shell 的命令行里含脚本名」
+    （shell 被专门拉来跑本脚本的形态）→ 按 **tty 精确关窗**（`ps -o tty=` 拿自己的
+    tty，AppleScript 遍历窗口/标签匹配，避免 `close front window` 关错用户切走的窗口；
+    只剩这一个标签则 `quit` 整个 App）。
+  - **manual（手动）**：父进程是交互 shell 且其命令行与脚本无关 → 直接退出，
+    提示符自然回来（连回车都不用等）。
+  - **unknown（判不了）**：既不冒险关窗、也不留死窗口 —— `exec "${SHELL:-/bin/zsh}"`
+    换成交互 shell，窗口还能继续打字。
 - `osascript` 必须**后台 + 延迟**（`( sleep 0.4; osascript … ) &`）：此刻 bash 自己还占着窗口，
   同步调 `close` / `quit` 会弹「关闭窗口将终止正在运行的进程」确认框；让 bash 先退出再关就干净。
 - **Windows 不用判父进程**：双击 `hwb.cmd` 起的窗口，脚本一结束 cmd 自己就关；
