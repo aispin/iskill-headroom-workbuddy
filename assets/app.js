@@ -139,6 +139,95 @@
     setTimeout(function () { cursorLine.classList.add("in"); }, 220 + rows.length * 170);
   }
 
+  /* ── Agent 对话窗（可选组件，与终端窗二选一）─────────────────────────
+     为什么要有它：这些 skill 的「使用现场」是用户与 AI agent 的对话，
+     不是 shell 输出 —— 落地页 hero 右栏配 chat 就渲染成对话气泡，
+     不配则维持终端窗，老页面零影响。
+     数据（content.js 的 lang.*.chat）：
+       chat: {
+         title: "AI Agent · 对话现场",     // 顶栏标题
+         status: "在线",                   // 顶栏右侧状态（缺省不显示）
+         userLabel: "你", agentLabel: "AI", // 头像文字，缺省 你 / AI
+         messages: [
+           { role: "user",  text: "…" },                       // 右侧气泡
+           { role: "agent", text: "…\n…", tag: "已读 SKILL.md" } // 左侧气泡，可带徽标
+         ]
+       }
+     实现采用「自愈替换」：不动 index.html 的 .term 骨架，首次渲染时把
+     .term 原位换成 .chat 并暂存 —— 切语言后若这一语言没配 chat，还能换回来。 */
+  var CHAT_TERM = null;      // 被替换下来的终端窗元素
+  var CHAT_TERM_SIB = null;  // 它原来的 nextSibling（还原位置用）
+
+  function chatHost() {
+    var host = qs(".chat");
+    if (host) return host;
+    var term = qs(".term");
+    if (!term || !term.parentNode) return null;
+    host = el("div", "chat");
+    host.setAttribute("aria-hidden", "true");
+    CHAT_TERM_SIB = term.nextSibling;
+    term.parentNode.insertBefore(host, term);
+    term.parentNode.removeChild(term);
+    CHAT_TERM = term;
+    return host;
+  }
+
+  function chatBubbleText(text) {
+    var box = el("div", "chat-txt");
+    String(text == null ? "" : text).split("\n").forEach(function (t, i) {
+      if (i) box.appendChild(el("br"));
+      box.appendChild(document.createTextNode(t));
+    });
+    return box;
+  }
+
+  function renderChat(cfg) {
+    var host = chatHost();
+    if (!host) return;
+    host.innerHTML = "";
+    var bar = el("div", "chat-bar");
+    var logo = el("span", "chat-logo");
+    logo.innerHTML = icon("bot") || icon("bolt");
+    bar.appendChild(logo);
+    bar.appendChild(el("b", null, cfg.title || ""));
+    if (cfg.status) {
+      var st = el("span", "chat-st");
+      st.appendChild(el("i"));
+      st.appendChild(el("span", null, cfg.status));
+      bar.appendChild(st);
+    }
+    host.appendChild(bar);
+
+    var body = el("div", "chat-body");
+    host.appendChild(body);
+    var msgs = cfg.messages || [];
+    msgs.forEach(function (m, i) {
+      var user = m.role === "user";
+      var row = el("div", "chat-msg " + (user ? "user" : "agent"));
+      var av = el("span", "chat-av", user ? (cfg.userLabel || "你") : (cfg.agentLabel || "AI"));
+      var bubble = el("div", "chat-bubble");
+      bubble.appendChild(chatBubbleText(m.text));
+      if (m.tag) bubble.appendChild(el("span", "chat-tag", m.tag));
+      row.appendChild(av);
+      row.appendChild(bubble);
+      body.appendChild(row);
+      setTimeout(function () { row.classList.add("in"); }, 260 + i * 340);
+    });
+  }
+
+  /* hero 右栏总入口：配了 chat 用对话窗，否则终端窗（含切语言后的还原） */
+  function renderHeroVisual(dict) {
+    var cfg = dict.chat;
+    if (cfg && cfg.messages && cfg.messages.length) { renderChat(cfg); return; }
+    var chat = qs(".chat");
+    if (chat && CHAT_TERM) {
+      chat.parentNode.insertBefore(CHAT_TERM, CHAT_TERM_SIB);
+      chat.parentNode.removeChild(chat);
+      CHAT_TERM = null; CHAT_TERM_SIB = null;
+    }
+    renderTerminal((dict.terminal || {}).title, (dict.terminal || {}).lines);
+  }
+
   function renderStats(list) {
     var box = qs("#stats .grid");
     if (!box) return;
@@ -255,12 +344,34 @@
     });
   }
 
+  /* 顶栏品牌名：以 content.js 的 name 为唯一真源。
+     index.html 里那句是模板占位（init 时该被替换），漏改就会顶着
+     "ISKILL-EXAMPLE" 上线 —— 与其靠人记得改，不如每次渲染都刷一遍。 */
+  function renderBrand() {
+    var node = qs(".brand span");
+    if (node && P.name) node.textContent = P.name;
+  }
+
+  /* 导航链接随目标段落显隐：段落在 = 链接在，段落藏 = 链接藏 */
+  function syncNavAnchor(id, show) {
+    [].forEach.call(document.querySelectorAll('.nav a[href="#' + id + '"]'), function (a) {
+      a.hidden = !show;
+    });
+  }
+
   function renderShowcase(data) {
     var sec = qs("#shots");
     if (!sec) return;
     var items = (data && data.items) || [];
-    if (!items.length) { sec.style.display = "none"; return; }
+    if (!items.length) {
+      /* 没有截图就整段收起；**导航里那条 #shots 也要一起藏** ——
+         否则用户点「截图」跳到一个 display:none 的锚点，看上去就是「点了没反应」。 */
+      sec.style.display = "none";
+      syncNavAnchor("shots", false);
+      return;
+    }
     sec.style.display = "";
+    syncNavAnchor("shots", true);
     var box = qs("#shots .grid");
     box.innerHTML = "";
     items.forEach(function (s) {
@@ -431,8 +542,9 @@
       failed: uiText(dict, "failed", "复制失败")
     };
     applyText(dict);
+    renderBrand();
     renderPlatformBadge(lang);
-    renderTerminal((dict.terminal || {}).title, (dict.terminal || {}).lines);
+    renderHeroVisual(dict);
     renderStats(dict.stats);
     renderCompare(dict.compare);
     renderFeatures(dict.features);

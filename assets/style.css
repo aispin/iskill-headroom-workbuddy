@@ -292,6 +292,44 @@ h1.hero-title { font-size: clamp(34px, 5.4vw, 58px); font-weight: 800; letter-sp
 @keyframes lineIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes blink { 50% { opacity: 0; } }
 
+/* ── Agent 对话窗（chat 组件，可选；由 app.js 原位替换 .term）────────── */
+.chat {
+  border-radius: var(--radius-lg); overflow: hidden;
+  border: 1px solid var(--line-strong); background: var(--code-bg);
+  box-shadow: var(--shadow); transform: perspective(1400px) rotateY(-6deg) rotateX(3deg);
+}
+.chat-bar { display: flex; align-items: center; gap: 9px; padding: 11px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.chat-logo {
+  flex: none; width: 20px; height: 20px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+}
+.chat-logo svg { width: 12px; height: 12px; }
+.chat-bar b { font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, 0.72); }
+.chat-st { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255, 255, 255, 0.45); }
+.chat-st i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
+.chat-body { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
+.chat-msg { display: flex; gap: 9px; align-items: flex-end; opacity: 0; }
+.chat-msg.in { animation: lineIn 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
+.chat-msg.user { flex-direction: row-reverse; }
+.chat-av {
+  flex: none; width: 26px; height: 26px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+}
+.chat-msg.user .chat-av { background: rgba(255, 255, 255, 0.13); color: rgba(255, 255, 255, 0.78); }
+.chat-msg.agent .chat-av { background: linear-gradient(135deg, var(--brand), var(--brand2)); color: #fff; }
+.chat-bubble { max-width: 80%; padding: 9px 12px; border-radius: 14px; line-height: 1.66; color: #dbe4f5; overflow-wrap: anywhere; }
+.chat-msg.user .chat-bubble { background: color-mix(in srgb, var(--brand) 32%, #0d1220); border-bottom-right-radius: 4px; }
+.chat-msg.agent .chat-bubble { background: rgba(255, 255, 255, 0.07); border-bottom-left-radius: 4px; }
+.chat-txt { display: block; }
+.chat-tag {
+  display: inline-block; margin-top: 7px; padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; color: var(--brand2);
+  background: color-mix(in srgb, var(--brand2) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand2) 32%, transparent);
+}
+
 /* ── 数字条 ──────────────────────────────────────────────────────────── */
 .stats { padding: 8px 0 4px; }
 .stats .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
@@ -459,7 +497,7 @@ footer .sep { opacity: 0.45; }
 @media (max-width: 1000px) {
   .features .grid { grid-template-columns: repeat(2, 1fr); }
   .hero .wrap { grid-template-columns: 1fr; }
-  .term { transform: none; }
+  .term, .chat { transform: none; }
 }
 @media (max-width: 720px) {
   section { padding: 56px 0; }
@@ -475,7 +513,7 @@ footer .sep { opacity: 0.45; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
   .reveal { opacity: 1; transform: none; }
-  .term-line { opacity: 1; }
+  .term-line, .chat-msg { opacity: 1; }
 }
 @media print {
   .bg-layer, .bg-grid, .topbar, .code-copy { display: none; }

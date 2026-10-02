@@ -14,6 +14,9 @@
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
 
   window.PROMO_ICONS = {
+    /* 机器人（Agent 对话窗顶栏徽标）：几何手绘，不描摹拟物 */
+    bot:
+      S + '<rect x="4.5" y="8" width="15" height="11" rx="3.5"/><path d="M12 8V4.8"/><circle cx="12" cy="3.6" r="1.2"/><circle cx="9.2" cy="13" r="1.15"/><circle cx="14.8" cy="13" r="1.15"/><path d="M9.5 16.4h5"/></svg>',
     /* 终端 / 命令行 */
     terminal:
       S + '<rect x="2.5" y="4" width="19" height="16" rx="3"/><path d="M7 10l2.6 2.4L7 15"/><path d="M12.5 15.2h4.2"/></svg>',
