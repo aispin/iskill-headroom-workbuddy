@@ -124,8 +124,8 @@ window.PROMO = {
       },
 
       cta: {
-        title: "现在就能用 curl 调它",
-        desc: "一条命令（或双击一下）起完，控制台里复制 Key 就能跑。",
+        title: "现在就能在你的AI Agent里用它",
+        desc: "起完服务，把控制台里的接口地址和 Key 填进你的 AI Agent 模型设置，它就成了本地 OpenAI 接口。",
         primary: "去 GitHub 看看",
         secondary: "复制安装提示词"
       },
@@ -239,8 +239,8 @@ window.PROMO = {
       },
 
       cta: {
-        title: "You can curl it in a minute",
-        desc: "One command (or one double-click), then copy the key from the console.",
+        title: "Use it in your AI Agent now",
+        desc: "Once it's up, paste the endpoint and key from the console into your AI Agent's model settings — it becomes a local OpenAI-compatible API.",
         primary: "Open on GitHub",
         secondary: "Copy install prompt"
       },
