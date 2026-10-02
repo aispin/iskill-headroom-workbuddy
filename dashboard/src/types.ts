@@ -20,13 +20,23 @@ export interface HubHealth {
   _error?: string;
 }
 
+/** hub 侧 fetch_credits() 的产出（wb_accounts.py）：credits 是对象，不是数字。 */
+export interface AccountCredits {
+  remain?: number;
+  used?: number;
+  size?: number;
+  packages?: Array<{ name?: string; remain?: number; used?: number; size?: number }>;
+  updated_at?: number;
+  updated_iso?: string;
+}
+
 export interface Account {
   uid: string;
   nickname?: string;
   realm?: string;
   domain?: string;
   enabled?: boolean;
-  credits?: number | string | null;
+  credits?: number | string | AccountCredits | null;
   expiresIn?: string | null;
   hasRefreshToken?: boolean;
   source?: string;

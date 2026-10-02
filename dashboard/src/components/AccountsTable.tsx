@@ -8,6 +8,24 @@ export function AccountsTable({ data }: { data: StatusPayload | null }) {
   const accounts = data?.hub.accounts ?? [];
   const err = data?.hub.accounts_error;
 
+  const fmt = (n: number | undefined) => (n ?? 0).toLocaleString("en-US");
+
+  // hub 的 credits 是对象 {remain, used, size, packages, updated_at, updated_iso}
+  // （wb_accounts.fetch_credits）；直接渲染对象会触发 React #31「对象不能作为子节点」。
+  // 这里归一成「剩余 / 总量」文本，数字/字符串旧形态保持原样输出。
+  const creditCell = (a: Account): ReactNode => {
+    const c = a.credits;
+    if (c === null || c === undefined) return t("common.dash");
+    if (typeof c === "object") {
+      const remain = typeof c.remain === "number" ? c.remain : undefined;
+      const size = typeof c.size === "number" ? c.size : undefined;
+      if (remain === undefined && size === undefined) return t("common.dash");
+      const text = size ? `${fmt(remain ?? 0)} / ${fmt(size)}` : fmt(remain ?? 0);
+      return <span title={c.updated_iso || undefined}>{text}</span>;
+    }
+    return String(c);
+  };
+
   const realmLabel = (r?: string) =>
     r === "intl"
       ? t("common.realm.intl")
@@ -67,7 +85,7 @@ export function AccountsTable({ data }: { data: StatusPayload | null }) {
           <td className="px-2.5 py-1.5">
             <Pill tone={s.tone}>{s.text}</Pill>
           </td>
-          <td className="px-2.5 py-1.5">{a.credits ?? t("common.dash")}</td>
+          <td className="px-2.5 py-1.5">{creditCell(a)}</td>
           <td className="px-2.5 py-1.5">{a.expiresIn ?? t("common.dash")}</td>
           <td className="px-2.5 py-1.5">
             {a.hasRefreshToken ? t("accounts.yes") : <span className="text-ink-soft">{t("accounts.no")}</span>}
