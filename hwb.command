@@ -6,44 +6,70 @@
 #
 # 为什么是这么薄的一层：真正的逻辑全在 scripts/hwb.py（一份跨平台代码），
 # 本文件只负责「找到 python + 把参数转过去 + 收尾」。
+#
+# 收尾判定的每一步都会写日志：~/.iskill-headroom-workbuddy/logs/launcher.log
+# （关窗这件事依赖 osascript，可能被系统权限拦下；没有日志就只能靠猜。）
 
 cd "$(dirname "$0")" || exit 1
 here="$(pwd)"
 me="$(basename "$0")"
+LOGDIR="${HOME}/.iskill-headroom-workbuddy/logs"
+mkdir -p "$LOGDIR" 2>/dev/null
+LAUNCH_LOG="${LOGDIR}/launcher.log"
+launch_log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$LAUNCH_LOG" 2>/dev/null; }
 
 # ── 场景判定 ────────────────────────────────────────────────
-# 「本脚本是双击打开的」还是「用户在自己 shell 里手动跑的」？
-#   · 双击：父进程 = login（终端 App 的包装进程）或终端 App 本身；
-#           或者父 shell 是被专门拉来跑本脚本的（命令行里含脚本名）。
-#   · 手动：父进程是交互 shell，且其命令行与本脚本无关 → 退出后提示符自然回来。
-#   · 判不了：返回 unknown —— 收尾时既不冒险关窗、也不留死窗口。
+# 「双击打开」还是「用户在自己 shell 里手动跑的」？三条证据，任一命中即 direct：
+#   a) 父进程 = login（Terminal 双击 .command 时的包装进程）/ 终端 App 本身
+#   b) 父 shell 的命令行里含本脚本名（shell 被专门拉来跑本脚本）
+#   c) 父 shell 刚被拉起（存活 < 90s）—— 双击新建的窗口就是这个形态
+# 父进程是「与脚本无关的老 shell」→ manual（退出后提示符自然回来，绝不动窗口）
+# 三条都判不了 → unknown（既不冒险关窗，也不留死窗口，换成交互 shell）
 classify_open() {
-  local ppid pcomm pcmd
+  local ppid pcomm pcmd petime mm
   ppid="$(ps -o ppid= -p $$ 2>/dev/null | tr -d ' ')"
-  [ -n "$ppid" ] || { echo "unknown"; return; }
+  if [ -z "$ppid" ]; then launch_log "classify: ps 取不到 ppid → unknown"; echo "unknown"; return; fi
   pcomm="$(ps -o comm= -p "$ppid" 2>/dev/null)"; pcomm="${pcomm##*/}"
   pcmd="$(ps -o command= -p "$ppid" 2>/dev/null)"
+  petime="$(ps -o etime= -p "$ppid" 2>/dev/null | tr -d ' ')"
+  launch_log "classify: ppid=$ppid pcomm=[$pcomm] etime=[$petime] pcmd=[$pcmd]"
   case "$pcomm" in
-    login|Terminal|iTerm|iTerm2|Warp|WezTerm|kitty|Alacritty|ghostty) echo "direct"; return ;;
+    login|Terminal|iTerm|iTerm2|Warp|WezTerm|kitty|Alacritty|ghostty)
+      launch_log "classify: 命中终端 App/包装进程 → direct"; echo "direct"; return ;;
   esac
   case "$pcomm" in
     zsh|bash|sh|fish|dash|-zsh|-bash)
       case "$pcmd" in
-        *"$me"*) echo "direct" ;;
-        *)       echo "manual" ;;
+        *"$me"*) launch_log "classify: 父 shell 命令行含脚本名 → direct"; echo "direct"; return ;;
+      esac
+      # etime 形态：SS（秒） / MM:SS / HH:MM:SS / DD-HH:MM:SS
+      case "$petime" in
+        *-*|*:*:*) launch_log "classify: 父 shell 已存在较久[$petime] → manual"; echo "manual"; return ;;
+        *:*)
+          mm="${petime%%:*}"
+          if [ "$((10#$mm))" -lt 2 ] 2>/dev/null; then
+            launch_log "classify: 父 shell 很新[$petime] → direct"; echo "direct"
+          else
+            launch_log "classify: 父 shell 已存在[$petime] → manual"; echo "manual"
+          fi; return ;;
+        *)
+          if [ "$petime" -lt 90 ] 2>/dev/null; then
+            launch_log "classify: 父 shell 很新[${petime}s] → direct"; echo "direct"
+          else
+            launch_log "classify: 父 shell 已存在[${petime}s] → manual"; echo "manual"
+          fi; return ;;
       esac ;;
-    *) echo "unknown" ;;
   esac
+  launch_log "classify: 父进程形态陌生 → unknown"; echo "unknown"
 }
 
-# 关掉本脚本所在的那个标签页/窗口；若终端里已没有别的标签，连 App 一起退。
-# 按 tty 精确定位（而不是 close front window）：万一用户此刻切到了别的窗口，
-# 也不会关错。⚠️ osascript 必须**放到后台并延迟一点点**：此刻 bash 自身还占着
-# 这个窗口，同步 close/quit 会弹「关闭窗口将终止正在运行的进程」确认框；
-# 让 bash 先退出、窗口里没活动进程了，再关就干净了。
+# 关掉本脚本所在的那个标签页（按 tty 精确定位）；若终端里已没有别的标签，连 App 一起退。
+# ⚠️ osascript 必须后台 + 延迟：此刻 bash 自身还占着窗口，同步 close/quit 会弹
+#    「关闭窗口将终止正在运行的进程」确认框。失败原因写进日志（可能是系统权限拦了）。
 close_terminal_window() {
   local my_tty script
-  my_tty="$(ps -o tty= -p $$ 2>/dev/null | tr -d ' ')"   # 形如 ttys004
+  my_tty="$(ps -o tty= -p $$ 2>/dev/null | tr -d ' ')"
+  launch_log "close: my_tty=[$my_tty] TERM_PROGRAM=[${TERM_PROGRAM:-}]"
   if [ -n "$my_tty" ]; then
     case "${TERM_PROGRAM:-}" in
       iTerm.app)
@@ -53,9 +79,8 @@ close_terminal_window() {
             else
               close current window
             end if
-          end tell' >/dev/null 2>&1 ) >/dev/null 2>&1 &
-        return
-        ;;
+          end tell' >/dev/null 2>>"$LAUNCH_LOG"; launch_log "close: iTerm osascript rc=$?" ) >/dev/null 2>&1 &
+        return ;;
     esac
     script="
       tell application \"Terminal\"
@@ -76,17 +101,16 @@ close_terminal_window() {
         end repeat
         if total <= 1 then quit
       end tell"
-    ( sleep 0.4; osascript -e "$script" >/dev/null 2>&1 ) >/dev/null 2>&1 &
+    ( sleep 0.4; osascript -e "$script" >/dev/null 2>>"$LAUNCH_LOG"; launch_log "close: Terminal osascript rc=$? (tab_tty=/dev/$my_tty)" ) >/dev/null 2>&1 &
     return
   fi
-  # tty 拿不到时的兜底：按「当前窗口」关（原行为）
   ( sleep 0.4; osascript -e 'tell application "Terminal"
       if (count of windows) <= 1 then
         quit
       else
         close front window
       end if
-    end tell' >/dev/null 2>&1 ) >/dev/null 2>&1 &
+    end tell' >/dev/null 2>>"$LAUNCH_LOG"; launch_log "close: Terminal(front) osascript rc=$?" ) >/dev/null 2>&1 &
 }
 
 PY="${ISKILL_PYTHON:-}"
@@ -103,31 +127,28 @@ fi
 
 "$PY" "$here/scripts/hwb.py" "$@"
 rc=$?
+launch_log "run: $me $* → rc=$rc"
 
 # ── 收尾 ────────────────────────────────────────────────────
 # rc=10 = 用户在菜单里选了退出（hwb.py 只表达意图，关不关窗由本壳决定）。
 if [ "$rc" -eq 10 ] && [ "$#" -eq 0 ] && [ -t 0 ]; then
   case "$(classify_open)" in
     direct)
-      # 双击场景：按 tty 精确关窗（最后一个标签则退掉整个终端 App）
       close_terminal_window
       exit 0
       ;;
     manual)
-      # 手动运行：什么都不做，提示符自然回来，绝不动用户的窗口
       exit $rc
       ;;
     *)
-      # 判不了（ps 不可用 / 父进程形态陌生）：既不冒险关窗，也不留
-      # 「[Process completed]」死窗口 —— 直接换成交互 shell，窗口还能继续用。
+      # 判不了：既不动用户的窗口，也不留「[Process completed]」死窗口 ——
+      # 换成交互 shell，窗口还能继续用。
       echo ""
       exec "${SHELL:-/bin/zsh}"
       ;;
   esac
 fi
 
-# 其余退出的双击场景（报错等）：等一个回车让人看清输出，然后也把窗口关干净；
-# 手动运行场景这里不会走到（上面 unknown/manual 已覆盖，只有 rc=10 才提前 return）。
 if [ "$#" -eq 0 ] && [ -t 0 ]; then
   echo
   printf "按回车键关闭窗口…"
