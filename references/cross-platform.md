@@ -115,8 +115,15 @@ Windows PowerShell 5.1 在没有 BOM 时按 **ANSI（中文机器上是 GBK）**
     提示符自然回来（连回车都不用等）。
   - **unknown（判不了）**：既不冒险关窗、也不留死窗口 —— `exec "${SHELL:-/bin/zsh}"`
     换成交互 shell，窗口还能继续打字。
-- `osascript` 必须**后台 + 延迟**（`( sleep 0.3; osascript … ) &`）：此刻 bash 自己还占着窗口，
-  同步调 `close` / `quit` 会弹「关闭窗口将终止正在运行的进程」确认框；让 bash 先退出再关就干净。
+- ⚠️ **关窗的顺序是「先 exit，再让后台 osascript 关」**，中间隔 ~0.3s：
+  ```bash
+  close_terminal_window   # 内部是 ( sleep 0.3; osascript … ) &
+  exit 0                  #  ← 必须 exit，绝不能 exec 一个交互 shell
+  ```
+  踩过：为了「关不掉也不留死窗口」加了 `exec zsh` 兜底 —— 结果 exec 出来的 shell
+  是**活动进程**，Terminal 关窗时判定「窗口里有正在运行的进程」，弹出确认框要用户再点一次。
+  正确姿势是让本 shell 先退出、窗口变空闲，osascript 再来关，全程静默。
+  **「不留死窗口」的兜底只用在 unknown 分支**（那里没有 osascript 参与，exec 不会引发确认框）。
 - ⚠️ **`osascript rc=0` ≠ 窗口真的关了**。踩过：把 `close t` 包在 `try … end try` 里，
   AppleScript 报错被吞、退出码仍是 0，于是「判定对 + rc=0 + 窗口没关」，完全看不出哪错了。
   正确做法：① 关窗动作**不要**用 try 吞错；② AppleScript `return` 一个状态串

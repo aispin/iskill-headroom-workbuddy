@@ -143,22 +143,24 @@ launch_log "run: $me $* → rc=$rc"
 
 # ── 收尾 ────────────────────────────────────────────────────
 # rc=10 = 用户在菜单里选了退出（hwb.py 只表达意图，关不关窗由本壳决定）。
+#
+# ⚠️ 关键顺序：先 exit，再让后台 osascript 关窗，中间隔 ~0.3s。
+#    绝不能在这里 exec 一个交互 shell —— 那会让窗口里留下活动进程，
+#    Terminal 关窗时就会弹「关闭窗口将终止正在运行的进程」确认框（真机实测）。
+#    正确姿势是让本 shell 先退出、窗口变空闲，osascript 再来关，静默完成。
 if [ "$rc" -eq 10 ] && [ "$#" -eq 0 ] && [ -t 0 ]; then
   case "$(classify_open)" in
     direct)
-      # 两条腿走路：后台 osascript 关标签（成功则标签被关掉）；
-      # 同时 exec 出一个交互 shell —— 万一 AppleEvent 被系统权限拦下，
-      # 也不会退回「[Process completed]」死窗口，而是留下一个能继续打字的窗口。
-      # 关一个只有空闲 shell 的标签不会弹「终止正在运行的进程」确认框。
       close_terminal_window
-      echo ""
-      exec "${SHELL:-/bin/zsh}"
+      exit 0
       ;;
     manual)
+      # 用户自己的 shell：直接退出，提示符自然回来，绝不动窗口
       exit $rc
       ;;
     *)
-      # 判不了：既不动用户的窗口，也不留死窗口 —— 落下可用 shell。
+      # 判不了：不关窗（怕关错），但也不留死窗口 —— 换成可用 shell。
+      # 这里没有 osascript 参与，所以 exec 不会引发确认框。
       echo ""
       exec "${SHELL:-/bin/zsh}"
       ;;
@@ -170,7 +172,7 @@ if [ "$#" -eq 0 ] && [ -t 0 ]; then
   printf "按回车键关闭窗口…"
   read -r _ || true
   case "$(classify_open)" in
-    direct) close_terminal_window; echo ""; exec "${SHELL:-/bin/zsh}" ;;
+    direct) close_terminal_window; exit $rc ;;
   esac
 fi
 exit $rc
