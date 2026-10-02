@@ -134,15 +134,19 @@ launch_log "run: $me $* → rc=$rc"
 if [ "$rc" -eq 10 ] && [ "$#" -eq 0 ] && [ -t 0 ]; then
   case "$(classify_open)" in
     direct)
+      # 两条腿走路：后台 osascript 关标签（成功则标签被关掉）；
+      # 同时 exec 出一个交互 shell —— 万一 AppleEvent 被系统权限拦下，
+      # 也不会退回「[Process completed]」死窗口，而是留下一个能继续打字的窗口。
+      # 关一个只有空闲 shell 的标签不会弹「终止正在运行的进程」确认框。
       close_terminal_window
-      exit 0
+      echo ""
+      exec "${SHELL:-/bin/zsh}"
       ;;
     manual)
       exit $rc
       ;;
     *)
-      # 判不了：既不动用户的窗口，也不留「[Process completed]」死窗口 ——
-      # 换成交互 shell，窗口还能继续用。
+      # 判不了：既不动用户的窗口，也不留死窗口 —— 落下可用 shell。
       echo ""
       exec "${SHELL:-/bin/zsh}"
       ;;
@@ -154,7 +158,7 @@ if [ "$#" -eq 0 ] && [ -t 0 ]; then
   printf "按回车键关闭窗口…"
   read -r _ || true
   case "$(classify_open)" in
-    direct) close_terminal_window ;;
+    direct) close_terminal_window; echo ""; exec "${SHELL:-/bin/zsh}" ;;
   esac
 fi
 exit $rc
