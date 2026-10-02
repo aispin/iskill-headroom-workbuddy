@@ -12,7 +12,7 @@ WorkBuddy 客户端 → Headroom(:8787 守住缓存 + 压增量) → workbuddy2a
 |---|---|---|
 | `8788` | **workbuddy2api-hub** | 私有协议转 OpenAI + 看板 OAuth 加账号 + 多账号双区域调度 + 每日保活 —— **没有它，内置模型根本接不出来** |
 | `8787` | **Headroom** | 冻结历史前缀**守住上游 prompt cache**（命中 = 未命中的 2%），只压**最新那条增量** —— 让会话**跑得更远、更省** |
-| `8786` | 本技能控制台 | 链路健康 / 加账号 / 生效 Key / 日志（可选） |
+| `8786` | 本技能控制台 | 链路健康 / 加账号 / 生效 Key / 日志（`start` 默认一并拉起并自动开浏览器） |
 
 > 完整操作说明见 `SKILL.md`；**省 token 方案的调研已归档在 `docs/token-savings-research.md`**
 > （headroom 官方文档 + 本机实测 + 开源横向对比，结论：真正的杠杆是**上游缓存命中率**，不是压缩比）。
@@ -195,7 +195,7 @@ bash references/legacy-token-capture/enable_cdp.sh --status   # 复核
 
 ### 跨平台入口（仓库根）
 
-**双击就能用** —— 弹出菜单（启动 / 停止 / 重启 / 状态 / 控制台 / 加账号 / 体检）：
+**双击就能用** —— 弹出菜单（启动 / 停止 / 重启 / 状态 / 控制台 / 加账号 / 体检）；启动会连图形控制台（:8786）一起拉起，并自动在默认浏览器打开：
 
 | 文件 | 平台 | 说明 |
 |---|---|---|
@@ -211,12 +211,12 @@ bash references/legacy-token-capture/enable_cdp.sh --status   # 复核
 
 | 脚本 | 作用 |
 |---|---|
-| `start.sh` | 一键起服务：clone/更新 hub → 生成密钥与配置 → 装 Headroom → 启动 hub + Headroom → 自检 → 打印客户端配置 |
-| `stop.sh` | 停止两个服务（含按端口兜底清理，带误杀守卫） |
-| `restart.sh` | stop + start |
+| `start.sh` | 一键起服务：clone/更新 hub → 生成密钥与配置 → 装 Headroom → 启动 hub + Headroom → 自检 → 拉起图形控制台（:8786）并自动开浏览器 → 打印客户端配置（`--no-open` 不弹浏览器、`--no-console` 不拉控制台） |
+| `stop.sh` | 停止全部（hub / headroom / 图形控制台；`--no-dashboard` 保留控制台；含按端口兜底清理，带误杀守卫） |
+| `restart.sh` | stop + start（已在运行的控制台复用，不会被杀） |
 | `status.sh` | 进程 / 账号池 / 出口区域 / 省 token / 生效 API Key（`--raw` 输出原始 JSON） |
 | `login.sh` | 打开看板并等待 OAuth 账号入库（`--no-wait` / `--timeout N`） |
-| `dashboard.sh` | 启动 / 构建 / 停止本地控制台（`--build` / `--stop` / `--fg` / `--status`） |
+| `dashboard.sh` | 启动 / 构建 / 停止本地控制台（`--build` / `--stop` / `--fg` / `--status` / `--no-open`） |
 
 ### 只在 macOS / Linux 上的辅助脚本
 

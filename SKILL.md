@@ -206,8 +206,8 @@ Headroom 自己有账本：`~/.headroom/proxy_savings.json`（汇总，**会滞�
 --accounts-dir / --usage-dir / --system-prompt / --user-agent
 ```
 
-### 本技能控制台（`:8786`）— 观测层（可选）
-一屏看清三跳链路，并能一键 OAuth 加账号。**它不是必需的**——只用 `start.sh` + 客户端也能跑通；它的价值是把「翻 hub 看板找状态」变成「一屏可见」。
+### 本技能控制台（`:8786`）— 图形操作台
+一屏看清三跳链路，并能一键 OAuth 加账号。**`start` 默认会把它一并拉起并自动在默认浏览器打开**——双击启动器即可获得「服务 + 控制台」全套；不想要就 `start --no-console`。只用命令行 + hub 看板也能跑通，它的价值是把「翻 hub 看板找状态」变成「一屏可见」。
 
 技术栈：**React 19 + Vite 8 + TypeScript + Tailwind CSS 4**（源码在 `dashboard/`，构建产物 `dashboard/dist/` 由 `scripts/dashboard.py`（纯 stdlib）单端口托管）。**运行时只需要 Python，不需要 Node**——Node 只在构建前端时用。
 
@@ -219,7 +219,7 @@ Headroom 自己有账本：`~/.headroom/proxy_savings.json`（汇总，**会滞�
 
 ### 双击运行（macOS / Windows 都支持）
 
-不想敲命令，就双击仓库根的启动器 —— 会弹出一个菜单（启动 / 停止 / 重启 / 状态 / 控制台 / 加账号 / 体检）：
+不想敲命令，就双击仓库根的启动器 —— 会弹出一个菜单（启动 / 停止 / 重启 / 状态 / 控制台 / 加账号 / 体检）。**选「启动」后三件套一起就位：hub + Headroom + 图形控制台（:8786），并自动在默认浏览器打开控制台**：
 
 | 平台 | 双击这个 | 说明 |
 |---|---|---|
@@ -244,15 +244,17 @@ bash $S/scripts/login.sh
 # 3) 看状态 / 省 token 统计
 bash $S/scripts/status.sh
 
-# 4)（可选）开本地控制台
-bash $S/scripts/dashboard.sh
+# 4) 图形控制台（start 时已默认拉起并打开；单独管理才需要）
+bash $S/scripts/dashboard.sh             # 再启动/打开浏览器
+bash $S/scripts/dashboard.sh --stop      # 只停控制台
 
 # 5)（可选）验证 Headroom 是否真的在压缩（A/B 对照，跑完自动清理临时实例）
 bash $S/scripts/test-compression.sh
 
 # 其他
-bash $S/scripts/restart.sh     # 重启两个服务
-bash $S/scripts/stop.sh        # 停止两个服务
+bash $S/scripts/restart.sh     # 重启（控制台保留复用）
+bash $S/scripts/stop.sh        # 停止全部（hub / headroom / 图形控制台）
+# 自动化场景：start --no-open 不弹浏览器；stop --no-dashboard 保留控制台
 ```
 
 **Windows 上不用这些 `.sh`**（虽然装了 Git Bash 也能跑）：等价写法是
@@ -315,6 +317,7 @@ extra = () if configured_keys() else (API_KEY,)   # 面板里一旦有 Key，命
 ```bash
 S=~/.workbuddy/skills/iskill-headroom-workbuddy
 bash $S/scripts/dashboard.sh            # 启动 + 打开浏览器（127.0.0.1:8786，产物缺失会自动构建）
+bash $S/scripts/dashboard.sh --no-open  # 启动但不弹浏览器
 bash $S/scripts/dashboard.sh --build    # 只构建前端
 bash $S/scripts/dashboard.sh --fg       # 前台运行
 bash $S/scripts/dashboard.sh --stop     # 停止
@@ -336,7 +339,7 @@ cd $S/dashboard && npm run dev          # → http://127.0.0.1:5173
   3. 复制失败（剪贴板被策略拒）时，若当前是打码态，先自动展开再选中文本，否则用户手动 ⌘C 选到的是掩码。
 - 其余可复制字段（接口地址、模型名）不打码，走同一个 `CopyBox`（`secret` 开关控制）。
 - 前端是 React 工程，源码 `dashboard/`，产物 `dashboard/dist/`；改动后在 `dashboard/` 里跑 `npm run build`（或用 `dashboard.sh --build`）。
-- 控制台**独立于 `start.sh` / `stop.sh`**——重启服务时它不会被杀，可以持续观察。
+- 控制台生命周期：`start` **默认一并拉起**（不想拉就 `--no-console`）；`stop` **默认连它一起停**（想保留就 `--no-dashboard`）；`restart` **不会杀它**——已在运行就直接复用，可以持续观察。
 - 只监听 `127.0.0.1`，仅供本机使用。
 - 深度管理（多 API Key、模型限制、每日限额、签到任务）请用 hub 原生看板。
 

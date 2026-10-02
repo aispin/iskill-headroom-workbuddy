@@ -579,7 +579,7 @@ def open_url(url: str) -> None:
 
 # ─────────────────────────────────────────────────────────────
 # 动作：start
-def do_start() -> int:
+def do_start(open_console: bool = True, open_browser: bool = True) -> int:
     RUNTIME.mkdir(parents=True, exist_ok=True)
     LOGS.mkdir(parents=True, exist_ok=True)
     HUB_ACCOUNTS.mkdir(parents=True, exist_ok=True)
@@ -755,10 +755,28 @@ def do_start() -> int:
         warn("账号池为空 —— 还不能真正调用模型")
         info(f"补账号：{launcher_hint()} login（看板里点 OAuth 登录，一次即可）")
 
-    # ── 7. 客户端配置
-    step(7, "客户端配置")
+    # ── 7. 图形控制台（React，:8786）—— 默认随启动一并拉起
+    dash_ok = False
+    if open_console:
+        step(7, "图形控制台")
+        dash_ok = do_dashboard("start", open_browser=False) == 0
+        if dash_ok:
+            ok(f"图形控制台已就绪：http://127.0.0.1:{DASH_PORT}/")
+        else:
+            warn("图形控制台未能启动（不影响 hub / headroom 主链路）—— 可稍后手动："
+                 + launcher_hint("dashboard"))
+
+    # ── 8. 客户端配置
+    step(8, "客户端配置")
     current = effective_api_key()
     source = "本脚本生成（hub.env）" if current == api_key else "看板设置的 API Key（已优先生效）"
+    if dash_ok:
+        dash_tail = "，并已在默认浏览器打开" if open_browser else ""
+        dash_block = (f"\n 图形控制台 : http://127.0.0.1:{DASH_PORT}/"
+                      f"\n   （React 操作台，已随本次启动一并拉起{dash_tail}）")
+    else:
+        dash_block = (f"\n 图形控制台 : 未随本次启动 —— 手动：{launcher_hint('dashboard')}"
+                      f"（React 操作台 :{DASH_PORT}）")
     print(f"""
 ══════════════════════════════════════════════════════════
  iskill-headroom-workbuddy 已启动
@@ -774,12 +792,15 @@ def do_start() -> int:
  用量看板   : http://127.0.0.1:{HUB_PORT}/
    面板密码 : {panel_pw}
    （账号增删、API Key 管理、用量统计、签到任务都在这里）
+{dash_block}
 
  省 token   : {launcher_hint()} status
  加账号     : {launcher_hint()} login
  日志       : {LOGS}
- 停止       : {launcher_hint()} stop
+ 停止       : {launcher_hint()} stop （会连图形控制台一起停）
 ════════════════════════════════════════════════════════""")
+    if open_browser and dash_ok:
+        open_url(f"http://127.0.0.1:{DASH_PORT}/")
     return 0
 
 
@@ -796,7 +817,7 @@ def _panel_password_matches(panel_pw: str) -> bool:
 
 # ─────────────────────────────────────────────────────────────
 # 动作：stop
-def do_stop(quiet: bool = False, with_dashboard: bool = False) -> int:
+def do_stop(quiet: bool = False, with_dashboard: bool = True) -> int:
     def log(msg: str) -> None:
         print(f"[iskill-headroom-workbuddy] {msg}")
 
@@ -1049,7 +1070,7 @@ def _build_dashboard() -> bool:
     return True
 
 
-def do_dashboard(action: str = "start", foreground: bool = False) -> int:
+def do_dashboard(action: str = "start", foreground: bool = False, open_browser: bool = False) -> int:
     def log(msg: str) -> None:
         print(f"[iskill-headroom-workbuddy] {msg}")
 
@@ -1095,8 +1116,9 @@ def do_dashboard(action: str = "start", foreground: bool = False) -> int:
             bad(f"启动失败，看看日志：{LOGS / 'dashboard.log'}")
             return 1
 
-    open_url(f"http://127.0.0.1:{DASH_PORT}/")
-    log("已尝试打开浏览器")
+    if open_browser:
+        open_url(f"http://127.0.0.1:{DASH_PORT}/")
+        log("已尝试在默认浏览器打开控制台")
     return 0
 
 
@@ -1153,11 +1175,11 @@ def do_open_panel() -> int:
 
 # ─────────────────────────────────────────────────────────────
 MENU = [
-    ("1", "启动服务", lambda: do_start()),
-    ("2", "停止服务", lambda: do_stop()),
-    ("3", "重启服务", lambda: do_stop() or do_start()),
+    ("1", "启动服务（含图形控制台 + 自动开浏览器）", lambda: do_start()),
+    ("2", "停止服务（含图形控制台）", lambda: do_stop()),
+    ("3", "重启服务（控制台保留复用）", lambda: do_stop(with_dashboard=False) or do_start()),
     ("4", "查看状态", lambda: do_status()),
-    ("5", "打开控制台（React 控制台 :8786）", lambda: do_dashboard("start")),
+    ("5", "打开控制台（React 控制台 :8786）", lambda: do_dashboard("start", open_browser=True)),
     ("6", "添加上游账号（OAuth）", lambda: do_login()),
     ("7", "打开用量看板", lambda: do_open_panel()),
     ("8", "环境体检", lambda: do_doctor()),
@@ -1200,10 +1222,17 @@ def main() -> int:
         prog="hwb.py", add_help=True,
         description="iskill-headroom-workbuddy 跨平台启动器（macOS / Windows / Linux）")
     sub = ap.add_subparsers(dest="action")
-    sub.add_parser("start", help="启动两个服务")
-    p_stop = sub.add_parser("stop", help="停止服务")
-    p_stop.add_argument("--with-dashboard", action="store_true", help="连本地控制台一起停")
-    sub.add_parser("restart", help="重启")
+    p_start = sub.add_parser("start", help="启动服务（默认连图形控制台一起拉起，并打开浏览器）")
+    p_start.add_argument("--no-open", action="store_true", help="不自动打开浏览器（脚本/自动化场景用）")
+    p_start.add_argument("--no-console", action="store_true", help="不拉起图形控制台（:8786）")
+    p_stop = sub.add_parser("stop", help="停止服务（默认连图形控制台一起停）")
+    p_stop.add_argument("--with-dashboard", dest="with_dashboard", action="store_true",
+                        default=True, help="连本地控制台一起停（默认）")
+    p_stop.add_argument("--no-dashboard", dest="with_dashboard", action="store_false",
+                        help="只停 hub/headroom，控制台保留")
+    p_restart = sub.add_parser("restart", help="重启（已在运行的控制台复用，不会被杀）")
+    p_restart.add_argument("--no-open", action="store_true", help="不自动打开浏览器")
+    p_restart.add_argument("--no-console", action="store_true", help="不拉起图形控制台（:8786）")
     p_status = sub.add_parser("status", help="查看状态")
     p_status.add_argument("--raw", action="store_true", help="输出原始 JSON")
     p_login = sub.add_parser("login", help="添加账号（OAuth）")
@@ -1214,6 +1243,7 @@ def main() -> int:
     p_dash.add_argument("--stop", action="store_true", help="停止控制台")
     p_dash.add_argument("--status", action="store_true", help="查看控制台状态")
     p_dash.add_argument("--fg", action="store_true", help="前台运行")
+    p_dash.add_argument("--no-open", action="store_true", help="启动后不自动打开浏览器")
     sub.add_parser("open", help="打开用量看板")
     sub.add_parser("doctor", help="环境体检")
     sub.add_parser("menu", help="交互菜单")
@@ -1224,12 +1254,12 @@ def main() -> int:
     if a in (None, "menu"):
         return do_menu()
     if a == "start":
-        return do_start()
+        return do_start(open_console=not args.no_console, open_browser=not args.no_open)
     if a == "stop":
         return do_stop(with_dashboard=args.with_dashboard)
     if a == "restart":
-        do_stop(quiet=True)
-        return do_start()
+        do_stop(quiet=True, with_dashboard=False)
+        return do_start(open_console=not args.no_console, open_browser=not args.no_open)
     if a == "status":
         return do_status(raw=args.raw)
     if a == "login":
@@ -1241,7 +1271,7 @@ def main() -> int:
             return do_dashboard("stop")
         if args.status:
             return do_dashboard("status")
-        return do_dashboard("start", foreground=args.fg)
+        return do_dashboard("start", foreground=args.fg, open_browser=not args.no_open)
     if a == "open":
         return do_open_panel()
     if a == "doctor":
