@@ -95,6 +95,14 @@ def process_alive(pid):
         return False
 
 
+# 本控制台只跟 127.0.0.1 通信 —— 代理一律禁用。
+# 踩坑（2026-10-02 实锤）：urllib 会吃 http_proxy 环境变量（用户 shell 里代理端口频繁轮换，
+# 控制台进程启动时继承的代理一死/一换，本机请求就被发去死代理 → Errno 61 Connection refused
+# → 控制台误报「hub 未响应」，而 hub 实际在跑）；且 no_proxy 未设时 127.0.0.1 不被豁免。
+# 修复：ProxyHandler({}) 显式空代理，环境变量与 macOS 系统代理一概不理。
+_NO_PROXY_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
 def http_json(url, method="GET", payload=None, headers=None, timeout=8):
     data = None
     hdrs = dict(headers or {})
@@ -102,7 +110,7 @@ def http_json(url, method="GET", payload=None, headers=None, timeout=8):
         data = json.dumps(payload).encode("utf-8")
         hdrs.setdefault("Content-Type", "application/json")
     req = urllib.request.Request(url, data=data, headers=hdrs, method=method)
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
+    with _NO_PROXY_OPENER.open(req, timeout=timeout) as resp:
         raw = resp.read().decode("utf-8", "replace")
     try:
         return json.loads(raw)
