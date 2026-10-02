@@ -97,27 +97,14 @@ window.PROMO = {
       steps: {
         eyebrow: "上手",
         title: "三步跑起来",
-        sub: "",
+        sub: "起服务、加账号都由 agent 跑；只有扫码登录必须你本人。",
         items: [
-          {
-            title: "交给 AI 装",
-            desc: "把提示词粘给 AI，它会拉代码、读文档；运行时全部落在 ~/.iskill-headroom-workbuddy/。",
-            codeKey: "install"
-          },
-          {
-            title: "起服务（或直接双击）",
-            desc: "首次启动会下载 Kompress ONNX 模型，给足 180 秒。macOS 双击 <code>hwb.command</code>、Windows 双击 <code>hwb.cmd</code> 会弹出菜单（启动 / 停止 / 重启 / 状态 / 控制台 / 加账号）；命令行里也能按动作调用。",
-            codeName: "shell",
-            code: "# macOS / Linux\nbash scripts/start.sh\n\n# Windows（PowerShell）\n.\\hwb.ps1 start        # 或双击 hwb.cmd 走菜单\n\n# 想连历史一起压（首请求要加载模型，约 32s）\nHEADROOM_MODE=token bash scripts/start.sh"
-          },
-          {
-            title: "配客户端",
-            desc: "在 WorkBuddy 里加一个自定义模型指向本地端点，API Key 从控制台那行复制。",
-            codeName: "text",
-            code: "# WorkBuddy → 设置 → 模型 → 添加模型 → 自定义/Custom\n# 接口地址  http://localhost:8787/v1/chat/completions\n# API Key   见控制台「客户端配置」一行（默认打码，点「显示」）"
-          }
+          { title: "交给 AI 装", desc: "把这句话粘进对话框，agent 会自己拉代码、读文档，再告诉你用法。", codeKey: "install" },
+          { title: "让它起服务", desc: "首次会下载压缩模型，给它几分钟；默认 cache 档别动——命中价只有未命中的 2%。", codeName: "prompt", code: "把 WorkBuddy 内置模型接成本地 OpenAI 兼容 API，起服务，压缩档用默认。" },
+          { title: "扫码 + 填两行", desc: "加账号要你本人扫码（浏览器会自动打开）；之后把控制台那行的地址与 Key 填进 WorkBuddy 的模型设置。", codeName: "text", code: "接口地址 http://localhost:8787/v1/chat/completions\nAPI Key  控制台「客户端配置」那行（点「显示」）" }
         ]
       },
+
 
       faq: {
         eyebrow: "问答",
@@ -221,27 +208,14 @@ window.PROMO = {
       steps: {
         eyebrow: "Get started",
         title: "Up and running in three steps",
-        sub: "",
+        sub: "The agent starts the service and adds the account; only the QR login needs you.",
         items: [
-          {
-            title: "Let your agent install it",
-            desc: "Paste the line into the chat — runtime data all lives in ~/.iskill-headroom-workbuddy/.",
-            codeKey: "install"
-          },
-          {
-            title: "Start the services (or just double-click)",
-            desc: "The first launch downloads the Kompress ONNX model — give it 180 seconds. On macOS double-click <code>hwb.command</code>; on Windows double-click <code>hwb.cmd</code> for a menu (start / stop / restart / status / console / add account). Both also take an action argument.",
-            codeName: "shell",
-            code: "# macOS / Linux\nbash scripts/start.sh\n\n# Windows (PowerShell)\n.\\hwb.ps1 start        # or double-click hwb.cmd for the menu\n\n# want real compression? (rewrites already-sent prefixes)\nHEADROOM_MODE=token bash scripts/start.sh"
-          },
-          {
-            title: "Point your client at it",
-            desc: "Add a custom model in WorkBuddy and copy the key from the console.",
-            codeName: "text",
-            code: "# WorkBuddy → Settings → Models → Add model → Custom\n# Endpoint  http://localhost:8787/v1/chat/completions\n# API key   from the console's Client config row (masked by default)"
-          }
+          { title: "Let your agent install it", desc: "Paste the line into the chat — it clones the repo, reads the docs, and tells you how to use it.", codeKey: "install" },
+          { title: "Have it start the service", desc: "The first run downloads a compression model — give it a few minutes. Leave the default cache preset alone: a hit costs 2% of a miss.", codeName: "prompt", code: "Expose WorkBuddy's built-in models as a local OpenAI-compatible API and start it. Keep the default compression preset." },
+          { title: "Scan the QR, paste two lines", desc: "Adding an account needs your own QR login (the browser opens itself). Then paste the endpoint and key from the console into WorkBuddy's model settings.", codeName: "text", code: "Endpoint http://localhost:8787/v1/chat/completions\nAPI Key  the \"client config\" line in the console (click Show)" }
         ]
       },
+
 
       faq: {
         eyebrow: "FAQ",
