@@ -1,13 +1,13 @@
 /* ============================================================================
- * iskill-headroom-workbuddy · 落地页内容
+ * iskill-headroom-workbuddy2api · 落地页内容
  * 只改这个文件就能换掉整页文案（外加 index.html 顶部 8 行 meta）。
  * ==========================================================================*/
 window.PROMO = {
   name: "ISKILL-HEADROOM-WORKBUDDY",
   brand: "#10c8a1",
   brand2: "#38bdf8",
-  repo: "https://github.com/aispin/iskill-headroom-workbuddy",
-  repoLabel: "aispin/iskill-headroom-workbuddy",
+  repo: "https://github.com/aispin/iskill-headroom-workbuddy2api",
+  repoLabel: "aispin/iskill-headroom-workbuddy2api",
 
   /* ── 平台兼容性标签（Hero「AI 技能」右边那枚）───────────────────────────
    * 取值 "mac-windows" | "macos" | "windows" | "linux" | "all" | "" | {zh,en}
