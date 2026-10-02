@@ -1,5 +1,10 @@
 # 跨平台实现说明（macOS / Windows / Linux）
 
+> 📌 **通用方法论的真源已迁到 `iskill-script-launcher`**（`~/.workbuddy/skills/iskill-script-launcher/`）。
+> 那里有可抄的启动器骨架（`.command` / `.ps1` / `.cmd` / `launcher.py` 四件套）与
+> 按「症状 → 根因 → 修法」组织的坑清单。**本文件保留本技能的具体实现说明**，
+> 新增的通用结论请写到那边，避免两处漂移。
+
 > 这份文件解释「为什么长这样」，以及踩过的坑。想加功能看最后一节。
 
 ## 一、为什么是「一份 Python + 各平台薄壳」
