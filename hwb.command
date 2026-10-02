@@ -67,50 +67,62 @@ classify_open() {
 # ⚠️ osascript 必须后台 + 延迟：此刻 bash 自身还占着窗口，同步 close/quit 会弹
 #    「关闭窗口将终止正在运行的进程」确认框。失败原因写进日志（可能是系统权限拦了）。
 close_terminal_window() {
-  local my_tty script
-  my_tty="$(ps -o tty= -p $$ 2>/dev/null | tr -d ' ')"
-  launch_log "close: my_tty=[$my_tty] TERM_PROGRAM=[${TERM_PROGRAM:-}]"
-  if [ -n "$my_tty" ]; then
-    case "${TERM_PROGRAM:-}" in
-      iTerm.app)
-        ( sleep 0.4; osascript -e 'tell application "iTerm2"
+  local my_tty short script
+  # 用 tty 命令拿全路径（与已验证可用的实现一致）；拿不到再退回 ps
+  my_tty="$(tty 2>/dev/null || true)"
+  [ -n "$my_tty" ] || my_tty="/dev/$(ps -o tty= -p $$ 2>/dev/null | tr -d ' ')"
+  short="${my_tty##*/}"
+  launch_log "close: my_tty=[$my_tty] short=[$short] TERM_PROGRAM=[${TERM_PROGRAM:-}]"
+
+  case "${TERM_PROGRAM:-}" in
+    iTerm.app)
+      ( sleep 0.3
+        out=$(/usr/bin/osascript -e 'tell application "iTerm2"
             if (count of windows) <= 1 then
               quit
             else
               close current window
             end if
-          end tell' >/dev/null 2>>"$LAUNCH_LOG"; launch_log "close: iTerm osascript rc=$?" ) >/dev/null 2>&1 &
-        return ;;
-    esac
-    script="
-      tell application \"Terminal\"
-        set total to 0
-        set closed_mine to false
-        repeat with w in windows
-          repeat with t in tabs of w
-            set total to total + 1
-            if not closed_mine then
-              try
-                if (tty of t) is \"/dev/$my_tty\" then
-                  set closed_mine to true
-                  close t
-                end if
-              end try
+          end tell' 2>>"$LAUNCH_LOG")
+        launch_log "close: iTerm osascript rc=$? out=[$out]" ) >/dev/null 2>&1 &
+      return ;;
+  esac
+
+  # 主路径照搬已验证可用的写法：按 tty 命中后 **close 窗口**（不是 tab）；
+  # 先试关标签（多标签窗口更礼貌），失败再关整个窗口；只剩一个窗口则 quit App。
+  # 关键：不再把 close 包在 try 里吞掉错误 —— 上一版就是这么「rc=0 却什么都没关」。
+  script="
+tell application \"Terminal\"
+    set myTTY to \"$short\"
+    set allTTYs to {}
+    set didClose to false
+    set nWin to count of windows
+    repeat with w in windows
+        if didClose then exit repeat
+        set hit to false
+        repeat with t in tabs of w
+            set tt to (tty of t) as string
+            set end of allTTYs to tt
+            if (tt is myTTY) or (tt is \"/dev/\" & myTTY) then
+                set hit to true
+                try
+                    close t
+                    set didClose to true
+                end try
+                exit repeat
             end if
-          end repeat
         end repeat
-        if total <= 1 then quit
-      end tell"
-    ( sleep 0.4; osascript -e "$script" >/dev/null 2>>"$LAUNCH_LOG"; launch_log "close: Terminal osascript rc=$? (tab_tty=/dev/$my_tty)" ) >/dev/null 2>&1 &
-    return
-  fi
-  ( sleep 0.4; osascript -e 'tell application "Terminal"
-      if (count of windows) <= 1 then
-        quit
-      else
-        close front window
-      end if
-    end tell' >/dev/null 2>>"$LAUNCH_LOG"; launch_log "close: Terminal(front) osascript rc=$?" ) >/dev/null 2>&1 &
+        if hit and not didClose then
+            close w
+            set didClose to true
+        end if
+    end repeat
+    if nWin <= 1 then quit
+    return \"didClose=\" & didClose & \" nWin=\" & nWin & \" ttys=\" & (allTTYs as string)
+end tell"
+  ( sleep 0.3
+    out=$(/usr/bin/osascript -e "$script" 2>>"$LAUNCH_LOG")
+    launch_log "close: Terminal osascript rc=$? out=[$out] myTTY=[$short]" ) >/dev/null 2>&1 &
 }
 
 PY="${ISKILL_PYTHON:-}"

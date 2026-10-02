@@ -115,8 +115,15 @@ Windows PowerShell 5.1 在没有 BOM 时按 **ANSI（中文机器上是 GBK）**
     提示符自然回来（连回车都不用等）。
   - **unknown（判不了）**：既不冒险关窗、也不留死窗口 —— `exec "${SHELL:-/bin/zsh}"`
     换成交互 shell，窗口还能继续打字。
-- `osascript` 必须**后台 + 延迟**（`( sleep 0.4; osascript … ) &`）：此刻 bash 自己还占着窗口，
+- `osascript` 必须**后台 + 延迟**（`( sleep 0.3; osascript … ) &`）：此刻 bash 自己还占着窗口，
   同步调 `close` / `quit` 会弹「关闭窗口将终止正在运行的进程」确认框；让 bash 先退出再关就干净。
+- ⚠️ **`osascript rc=0` ≠ 窗口真的关了**。踩过：把 `close t` 包在 `try … end try` 里，
+  AppleScript 报错被吞、退出码仍是 0，于是「判定对 + rc=0 + 窗口没关」，完全看不出哪错了。
+  正确做法：① 关窗动作**不要**用 try 吞错；② AppleScript `return` 一个状态串
+  （`didClose=` / `nWin=` / 所有 tab 的 tty 列表），并把它连同 rc 一起**写进日志**。
+- ⚠️ 关**标签页**（`close t`）在 Terminal 上并不总是生效；可靠的是命中 tty 后 `close w`
+  （关整个窗口）—— 这是从 `migrate_presets.command` 那里学来的已验证写法。
+  现版本策略：先试 `close t`（多标签窗口更礼貌），失败则 `close w`，只剩一个窗口时 `quit`。
 - **Windows 不用判父进程**：双击 `hwb.cmd` 起的窗口，脚本一结束 cmd 自己就关；
   在已有 PowerShell 里跑 `.\hwb.ps1` 则只是返回提示符。窗口生命周期天然分开，
   只要菜单退出时**跳过 `Read-Host`** 即可（否则那个「按回车键关闭」会挡住自动关闭）。
