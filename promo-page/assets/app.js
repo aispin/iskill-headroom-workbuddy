@@ -344,12 +344,34 @@
     });
   }
 
+  /* 顶栏品牌名：以 content.js 的 name 为唯一真源。
+     index.html 里那句是模板占位（init 时该被替换），漏改就会顶着
+     "ISKILL-EXAMPLE" 上线 —— 与其靠人记得改，不如每次渲染都刷一遍。 */
+  function renderBrand() {
+    var node = qs(".brand span");
+    if (node && P.name) node.textContent = P.name;
+  }
+
+  /* 导航链接随目标段落显隐：段落在 = 链接在，段落藏 = 链接藏 */
+  function syncNavAnchor(id, show) {
+    [].forEach.call(document.querySelectorAll('.nav a[href="#' + id + '"]'), function (a) {
+      a.hidden = !show;
+    });
+  }
+
   function renderShowcase(data) {
     var sec = qs("#shots");
     if (!sec) return;
     var items = (data && data.items) || [];
-    if (!items.length) { sec.style.display = "none"; return; }
+    if (!items.length) {
+      /* 没有截图就整段收起；**导航里那条 #shots 也要一起藏** ——
+         否则用户点「截图」跳到一个 display:none 的锚点，看上去就是「点了没反应」。 */
+      sec.style.display = "none";
+      syncNavAnchor("shots", false);
+      return;
+    }
     sec.style.display = "";
+    syncNavAnchor("shots", true);
     var box = qs("#shots .grid");
     box.innerHTML = "";
     items.forEach(function (s) {
@@ -520,6 +542,7 @@
       failed: uiText(dict, "failed", "复制失败")
     };
     applyText(dict);
+    renderBrand();
     renderPlatformBadge(lang);
     renderHeroVisual(dict);
     renderStats(dict.stats);
