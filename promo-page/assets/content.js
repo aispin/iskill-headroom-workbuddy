@@ -3,7 +3,7 @@
  * 只改这个文件就能换掉整页文案（外加 index.html 顶部 8 行 meta）。
  * ==========================================================================*/
 window.PROMO = {
-  name: "ISKILL-HEADROOM-WORKBUDDY",
+  name: "ISKILL-HEADROOM-WORKBUDDY2API",
   brand: "#10c8a1",
   brand2: "#38bdf8",
   repo: "https://github.com/aispin/iskill-headroom-workbuddy2api",
@@ -20,7 +20,7 @@ window.PROMO = {
     /* ── 中文 ───────────────────────────────────────────────────────── */
     zh: {
       meta: {
-        title: "ISKILL-HEADROOM-WORKBUDDY · 把内置模型变成本地 OpenAI 接口",
+        title: "ISKILL-HEADROOM-WORKBUDDY2API · 把内置模型变成本地 OpenAI 接口",
         description: "WorkBuddy 桌面端内置模型 → 人人可用的 OpenAI 兼容 API。hub 负责「能用」：协议转换、看板 OAuth 加账号、多账号双区域调度、每日保活；headroom 负责「耐用」：守住上游缓存并只压最新增量，让会话跑得更远。"
       },
       a11y: { skip: "跳到主要内容" },
@@ -135,7 +135,7 @@ window.PROMO = {
     /* ── English ────────────────────────────────────────────────────── */
     en: {
       meta: {
-        title: "ISKILL-HEADROOM-WORKBUDDY · Your built-in models as a local OpenAI API",
+        title: "ISKILL-HEADROOM-WORKBUDDY2API · Your built-in models as a local OpenAI API",
         description: "WorkBuddy desktop models → an OpenAI-compatible API anyone can use. The hub makes them usable: protocol translation, dashboard OAuth for accounts, dual-region scheduling, daily keep-alive. Headroom makes them last: it keeps the upstream cache warm and compresses only the newest delta."
       },
       a11y: { skip: "Skip to content" },
