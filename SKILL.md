@@ -228,7 +228,11 @@ Headroom 自己有账本：`~/.headroom/proxy_savings.json`（汇总，**会滞�
 | Windows（PowerShell 里） | `.\hwb.ps1 start` | 也可以带动作直接跑：`.\hwb.ps1 status` / `.\hwb.ps1 stop` |
 
 三个入口都是**极薄的壳**（找到 Python → 转给 `scripts/hwb.py`），带参数也能用，例如 `./hwb.command status`。
-菜单退出前会停一下等回车，免得双击出来的窗口一闪就没了。
+
+菜单里选 **0（或 q / 空行 / Ctrl-D）退出时会连同窗口一起关掉**（窗口是本终端的最后一个时，顺带退出整个终端 App）。
+> 只在你**双击**进来的那个窗口上生效：如果你是在自己开着的终端里敲 `./hwb.command`，
+> 退出菜单只会回到提示符并等一个回车 —— 不会替你关窗口（`hwb.command` 靠父进程名判断，
+> 判断不了就保守不关）。Windows 侧同理：双击 `hwb.cmd` 的窗口会自己关，已有 PowerShell 里跑则只是返回。
 
 ### 命令行
 

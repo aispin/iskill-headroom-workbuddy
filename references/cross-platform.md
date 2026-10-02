@@ -96,6 +96,24 @@ Windows PowerShell 5.1 在没有 BOM 时按 **ANSI（中文机器上是 GBK）**
 `kernel32.SetConsoleOutputCP(65001)` + `sys.stdout.reconfigure(encoding="utf-8")` 修。
 `.cmd` 文件本身刻意**全 ASCII**，避免 cmd.exe 的编码麻烦。
 
+### 8. 「退出菜单时关掉窗口」——两平台的代价完全不对等
+
+用户双击进来、菜单里选 0 退出，期望窗口跟着关掉（最后一个窗口则退掉整个终端 App）。
+**macOS 上这件事会误伤**：用户也可能在自己已经开着的终端里敲 `./hwb.command`，
+那时「关窗口」= 连他的 shell 会话、历史、当前目录一起干掉。所以做法是：
+
+- `hwb.py` 只用一个**约定退出码** `EXIT_MENU_QUIT = 10` 表达「用户主动退出菜单」，
+  自己不碰任何关窗动作（Python 不该知道宿主是谁）。
+- `hwb.command` 收到 rc=10 后，用 `ps -o ppid= -p $$` 看**父进程名**：
+  是终端 App（Terminal / iTerm / Warp / WezTerm…）才算双击场景 → 关窗；
+  是 `bash`/`zsh` 等交互 shell → 走老逻辑等一个回车；
+  **`ps` 拿不到信息时保守不关**（宁可不关，也不错关）。
+- `osascript` 必须**后台 + 延迟**（`( sleep 0.4; osascript … ) &`）：此刻 bash 自己还占着窗口，
+  同步调 `close` / `quit` 会弹「关闭窗口将终止正在运行的进程」确认框；让 bash 先退出再关就干净。
+- **Windows 不用判父进程**：双击 `hwb.cmd` 起的窗口，脚本一结束 cmd 自己就关；
+  在已有 PowerShell 里跑 `.\hwb.ps1` 则只是返回提示符。窗口生命周期天然分开，
+  只要菜单退出时**跳过 `Read-Host`** 即可（否则那个「按回车键关闭」会挡住自动关闭）。
+
 ## 四、怎么加一个新动作
 
 1. 在 `hwb.py` 里写 `def do_xxx() -> int`（返回 0/非 0，别在函数里 `sys.exit`）。

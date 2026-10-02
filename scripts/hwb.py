@@ -90,6 +90,11 @@ HEADROOM_PORT = int(os.environ.get("HEADROOM_PORT") or 8787)
 HUB_PORT = int(os.environ.get("HUB_PORT") or 8788)
 DASH_PORT = int(os.environ.get("DASHBOARD_PORT") or 8786)
 
+# 菜单里用户主动退出时用的退出码。启动器（hwb.command / hwb.ps1）识别它去关窗口：
+# 双击场景关掉窗口（若是最后一个窗口连终端 App 一起退）；手动运行场景不关，绝不能
+# 反过来把用户自己的 shell 会话干掉。详见 references/cross-platform.md。
+EXIT_MENU_QUIT = 10
+
 # Headroom 代理模式：
 #   cache（默认）—— 严格冻结历史前缀（逐字节不变），靠上游 prompt cache 省钱；
 #                   同时压缩每一轮**新到的增量**，但不重写历史 —— 所以 /stats 的
@@ -1202,9 +1207,9 @@ def do_menu() -> int:
             choice = input("  请选择 [0-8]: ").strip()
         except (EOFError, KeyboardInterrupt):
             print()
-            return 0
+            return EXIT_MENU_QUIT
         if choice in ("0", "q", "Q", ""):
-            return 0
+            return EXIT_MENU_QUIT
         for k, _, fn in MENU:
             if k == choice:
                 try:

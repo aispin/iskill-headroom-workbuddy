@@ -204,6 +204,10 @@ bash references/legacy-token-capture/enable_cdp.sh --status   # 复核
 | `hwb.ps1` | Windows | PowerShell 入口，也可 `.\hwb.ps1 status` 带动作调用 |
 | `scripts/hwb.py` | 全平台 | **唯一真源**：所有逻辑都在这里（纯标准库） |
 
+菜单选 **0 退出时会连同窗口一起关掉**（是本终端的最后一个窗口时，顺带退出整个终端 App）。
+只对**双击**出来的窗口生效：在自己开着的终端里跑则只是回到提示符，`hwb.command` 靠父进程名
+判断、判断不了就保守不关 —— 不会替你关掉正在用的会话。
+
 ### 兼容薄壳（`scripts/*.sh`）
 
 每个只有 ~10 行，作用是把参数转给 `hwb.py`。**改逻辑请改 `hwb.py`**。

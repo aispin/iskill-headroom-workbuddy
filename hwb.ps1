@@ -55,6 +55,12 @@ $script = Join-Path $SkillDir "scripts\hwb.py"
 $rc = $LASTEXITCODE
 
 if ($args.Count -eq 0) {
+    # rc=10 = 用户在菜单里选了退出：直接结束。
+    # · 双击 hwb.cmd 起来的窗口：脚本一结束，cmd 窗口随之关闭（无需额外动作）；
+    # · 在已有 PowerShell 里敲 .\hwb.ps1：这里只是返回提示符，不会关掉你的会话。
+    # Windows 侧不需要像 macOS 那样判父进程 —— 窗口生命周期天然就分得开。
+    if ($rc -eq 10) { exit 0 }
+
     Write-Host ""
     Read-Host "按回车键关闭窗口"
 }
